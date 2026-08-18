@@ -15,11 +15,12 @@
 - [x] Confirm `properties.average_temperature` is where the tile temp lives; confirm values change when you move the polygon (Polygon A: 367 tiles, mean 39.88 °C vs Polygon B ~4.6km east: 412 tiles, mean 39.85 °C).
 - [x] **Verify forecasting:** empirically tested — today's date returns zero data at any hour (past or future); yesterday and older return full real data. **No live forecast; historical-analog is the confirmed forward mechanism.** Recorded in handoff.md + memory.md.
 
-## Milestone 2 — Signals layer
-- [ ] Area-weighted mean over the tiles a site polygon overlaps (don't nearest-tile).
-- [ ] Historical baseline ("normal for this site, this hour") from 2021–now.
-- [ ] Forward signal: historical analog (confirmed mechanism — same hour/week, prior years).
-- [ ] Duration read via `analytic_type=exceedance`/`persistence` over a multi-hour window (`filter_type` 2 or 4).
+## Milestone 2 — Signals layer — ✅ DONE 2026-08-18
+- [x] Area-weighted mean over the tiles a site polygon overlaps (don't nearest-tile). Real result: 40.03°C for a real ~200m×155m worksite.
+- [x] Historical baseline ("normal for this site, this hour") from prior years. Real result: 40.12°C mean from real 2023/2024/2025 samples.
+- [x] Forward signal: historical analog (climatology + persistence projection). Real result: 38.88°C projected for 18:00 today.
+- [x] Duration read via `analytic_type=exceedance`/`persistence` over a multi-hour window (`filter_type` 2 or 4). Real result: 84.29h exceedance, 8.00h persistence over a real 7-day window.
+- [x] **Bonus finding, fixed:** discovered and fixed a real minimum-query-area threshold (~2km) — signals layer now always submits a bounding query AOI and area-weights against the real (smaller) site polygon. See memory.md.
 
 ## Milestone 3 — Autonomous loop
 - [ ] Registered-sites store (lat/lng + worker profile).
