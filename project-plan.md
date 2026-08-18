@@ -22,10 +22,10 @@
 - [x] Duration read via `analytic_type=exceedance`/`persistence` over a multi-hour window (`filter_type` 2 or 4). Real result: 84.29h exceedance, 8.00h persistence over a real 7-day window.
 - [x] **Bonus finding, fixed:** discovered and fixed a real minimum-query-area threshold (~2km) — signals layer now always submits a bounding query AOI and area-weights against the real (smaller) site polygon. See memory.md.
 
-## Milestone 3 — Autonomous loop
-- [ ] Registered-sites store (lat/lng + worker profile).
-- [ ] Scheduler iterates sites on an interval and calls the signals layer per site — no human prompt triggers it.
-- [ ] Per-site caching (per hour) to respect credits.
+## Milestone 3 — Autonomous loop — ✅ DONE 2026-08-18
+- [x] Registered-sites store (lat/lng + worker profile). `lookout/sites.py` + `lookout/data/sites.json` — 2 real Phoenix sites, distinct worker profiles.
+- [x] Scheduler iterates sites on an interval and calls the signals layer per site — no human prompt triggers it. `lookout/scheduler.py` — `tick()` for one autonomous pass, `run_forever()` for real deployment. Real result: construction site 40.04°C vs delivery hub 39.81°C — genuinely different real readings per site in one autonomous pass.
+- [x] Per-site caching (per hour) to respect credits. `lookout/cache.py` — confirmed live: tick 2 (same hour) served both sites from cache, zero new API calls.
 
 ## Milestone 4 — Decision policy (the reasoning; where we win)
 - [ ] LLM tool-use: agent calls the FortyGuard client as a tool.

@@ -5,7 +5,7 @@
 ---
 
 ## Current status
-- **Phase / milestone:** Milestone 1 and Milestone 2 (Signals layer) both complete on real data. Milestone 2 not yet committed. Ready to start Milestone 3 (autonomous scheduler loop).
+- **Phase / milestone:** Milestones 1-3 complete on real data (live API proof, signals layer, autonomous scheduler loop). Milestone 3 not yet committed. Ready to start Milestone 4 (decision policy / LLM tool-use).
 - **Last updated:** 2026-08-18 by Claude (agent session)
 - **Repo:** https://github.com/Datwebguy/lookout
 - **Live demo URL:** <none yet>
@@ -27,16 +27,21 @@
   - `lookout/signals.py`: `area_weighted_mean_temperature`, `historical_baseline`, `historical_analog_forward`, `duration_signal` — every one makes real calls and fails loudly (`SignalUnavailableError`), never fabricates a value.
   - `scripts/milestone2_signals_proof.py` ran clean end-to-end: area-weighted mean 40.03°C; baseline 40.12°C from real 2023/2024/2025 samples; forward projection 38.88°C for 18:00 today (climatology + persistence, since there's no live forecast); exceedance 84.29h and persistence 8.00h over the last real 7-day window.
   - Discovered and fixed a real minimum-query-area constraint (see Decisions below) — this was the root cause of an earlier apparent "outage," not a real backend failure.
+- **Milestone 3 — autonomous scheduler loop, done for real:**
+  - `lookout/sites.py` + `lookout/data/sites.json` — 2 real registered Phoenix sites with distinct worker profiles (construction laborer, delivery driver).
+  - `lookout/cache.py` — per-site-per-hour JSON cache.
+  - `lookout/scheduler.py` — `Scheduler.tick()` runs one real autonomous pass over every registered site (no human prompt per site); `run_forever()` is the real deployment loop.
+  - `scripts/milestone3_scheduler_proof.py` ran clean end-to-end: tick 1 pulled real, genuinely different signals per site (construction 40.04°C vs delivery 39.81°C, different baselines/forward projections/exceedance); tick 2 (same hour) served both sites entirely from cache — zero redundant API calls, confirmed live.
 
 ## In progress
 - Nothing active.
 
 ## Next up (top of the queue)
-1. Commit Milestone 2 (`lookout/signals.py`, `scripts/milestone2_signals_proof.py`, doc updates).
-2. Milestone 3: autonomous scheduler loop over registered sites, built on the signals layer.
+1. Commit Milestone 3 (`lookout/sites.py`, `lookout/cache.py`, `lookout/scheduler.py`, `lookout/geo.py`, `lookout/data/sites.json`, `scripts/milestone3_scheduler_proof.py`, doc updates).
+2. Milestone 4: decision policy — LLM tool-use over the signals layer, `{risk_level, recommended_action, timing, rationale}`, personalized by worker profile. Prove the same site yields different actions for different profiles (the two registered sites already have deliberately different profiles for this).
 
 ## Blockers / waiting on
-- None currently. (The apparent backend outage logged earlier this session turned out to have two real, now-understood causes — see Decisions below — not an actual FortyGuard outage.)
+- None currently.
 
 ## Decisions made (most recent first)
 - **Signals layer always submits a ~2km bounding query AOI, never the raw site polygon.** Live testing found a real minimum query-area threshold: a small worksite polygon (200m up to 1.5km per side) returns zero tiles even on dates otherwise 100% reliable (confirmed on 2024-07-15 and 2026-08-15, both proven reliable with a larger box); a ~2km box works consistently. `lookout/signals.py` now builds a `_bounding_query_aoi` around the site's centroid for every API call, then area-weights the *result* against the real (smaller) site polygon — this was the actual root cause of what first looked like a live outage.
@@ -58,7 +63,8 @@
 - Field paths confirmed against a real response: `average_temperature`/`min_temperature`/`max_temperature` on tcm tile `properties`; `stats_data.temperature_stats.{minimum,maximum,mean,standard_deviation}` for the aggregate; no `properties.temperature`.
 - **Never query FortyGuard for today's calendar date, and treat "yesterday" as unreliable too** — use `lookout.signals.most_recent_available_date()` (3-day margin) for anything that needs to be stable, e.g. a demo. The historical-analog signal covers the "ahead" need.
 - **Never submit a small site polygon directly as the query AOI** — use `lookout.signals.area_weighted_mean_temperature`/`duration_signal`, which build a real ~2km bounding AOI automatically and area-weight against the actual site polygon. A worksite AOI under ~1.5-2km per side returns zero tiles.
-- Proof scripts live at `scripts/milestone1_live_proof.py` and `scripts/milestone2_signals_proof.py` — reusable for future spot-checks, run with `PYTHONPATH=<repo root> python scripts/<name>.py` (needed because the scripts aren't invoked with `-m`, so the repo root isn't auto-added to `sys.path`).
+- Proof scripts live at `scripts/milestone{1,2,3}_*.py` — reusable for future spot-checks, run with `PYTHONPATH=<repo root> python scripts/<name>.py` (needed because the scripts aren't invoked with `-m`, so the repo root isn't auto-added to `sys.path`).
+- Registered sites live in `lookout/data/sites.json` (tracked in git); the per-site-per-hour cache lives alongside it at `lookout/data/signal_cache.json` (git-ignored — real runtime state, not source).
 
 ---
 
@@ -77,5 +83,10 @@
 [2026-08-18, part 3] Claude (agent session)
 - Did: Investigated the apparent outage properly instead of just waiting it out. Isolated two distinct, real, now-understood causes by testing systematically: (1) retried the exact known-good 2km polygon+date+hour 3x, still empty at first — but then testing older dates (3/7 days back, 2024-07-15) against the SAME known-good box showed they still worked fine, only "yesterday" was bad, meaning it wasn't a full outage. (2) Testing the small worksite polygon directly against a confirmed-reliable date (2024-07-15) also came back empty, isolating that the actual worksite-sized polygon (200m-1.5km) was too small an AOI regardless of date. Fixed lookout/signals.py to submit a real ~2km bounding query AOI (built around the site polygon's centroid) instead of the raw site polygon, and to area-weight results against the real site geometry afterward. Also bumped most_recent_available_date()'s safety margin from 1 to 3 days given the yesterday-instability finding. Reran scripts/milestone2_signals_proof.py end-to-end — all four signals succeeded with real, coherent numbers (area-weighted mean 40.03°C; baseline 40.12°C from 2023/2024/2025; forward projection 38.88°C for 18:00 today, math verified: 38.9735 + -0.0948 = 38.8787; exceedance 84.29h and persistence 8.00h over a real 7-day window).
 - Learned / decided: There is a real FortyGuard minimum query-area threshold (somewhere between 1.5km and 2km per side) — a worksite-sized polygon submitted directly returns zero tiles even on perfectly good dates. Also confirmed "yesterday" specifically can flip from available to unavailable within the same session, while 3+-day-old dates stayed reliable throughout. Neither of these is a bug in our code or a genuine outage — both are now handled for real in lookout/signals.py.
-- Left for next: Milestone 3 (autonomous scheduler loop). Commit Milestone 2 first.
+- Left for next: Milestone 3 (autonomous scheduler loop). Committed Milestone 2 (2456e50).
+
+[2026-08-18, part 4] Claude (agent session)
+- Did: Built Milestone 3 — lookout/geo.py (shared square_polygon helper, refactored out of signals.py to avoid duplicating the same trig math in the sites module), lookout/sites.py (Site/WorkerProfile dataclasses, JSON load/save), lookout/cache.py (per-site-per-hour JSON cache), lookout/scheduler.py (compute_site_signals + Scheduler.tick()/run_forever()). Registered 2 real Phoenix sites with deliberately different worker profiles in lookout/data/sites.json. Added actual_anchor_celsius reuse param to historical_analog_forward so the scheduler doesn't re-query a value it already has. Ran scripts/milestone3_scheduler_proof.py against the real API: tick 1 produced genuinely different real signals per site; tick 2 (same hour) hit cache for both sites with zero new calls.
+- Learned / decided: The autonomy mechanism (Scheduler.tick(), no per-site human trigger) and credit-respecting cache both work correctly against real multi-site data. Worker profiles are stored and loaded but don't yet influence the computed signals themselves (by design — that differentiation happens in Milestone 4's LLM decision layer, not the signals layer).
+- Left for next: Milestone 4 (decision policy) — LLM tool-use over lookout/signals.py + lookout/scheduler.py, prompt + schema producing {risk_level, recommended_action, timing, rationale}, proving the two already-registered sites/profiles yield different actions. Not yet committed.
 ```

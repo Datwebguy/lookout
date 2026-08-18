@@ -246,3 +246,7 @@ data/street_view/*
 !data/env_params/
 data/env_params/*
 !data/env_params/env_params_parcel_*.json
+
+# Lookout's own per-site-per-hour signal cache — real runtime state, regenerated on
+# every run, not source. lookout/data/sites.json (the registered-sites list) IS tracked.
+lookout/data/signal_cache.json

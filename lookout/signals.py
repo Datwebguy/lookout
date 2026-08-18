@@ -22,7 +22,6 @@ Confirmed live against the real API (2026-08-18, see handoff.md):
 
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 
@@ -30,6 +29,8 @@ from shapely.geometry import shape
 
 from fortyguard import FortyGuardClient
 from fortyguard.exceptions import FortyGuardError
+
+from .geo import square_polygon
 
 
 class SignalUnavailableError(RuntimeError):
@@ -54,32 +55,7 @@ def _bounding_query_aoi(site_geom, half_width_km: float = MIN_QUERY_HALF_WIDTH_K
     area-weight which returned tiles actually count and by how much.
     """
     centroid = site_geom.centroid
-    lat_rad = math.radians(centroid.y)
-    dlat = half_width_km / 110.574
-    dlon = half_width_km / (111.320 * math.cos(lat_rad))
-    lon_min, lon_max = centroid.x - dlon, centroid.x + dlon
-    lat_min, lat_max = centroid.y - dlat, centroid.y + dlat
-    return {
-        "type": "FeatureCollection",
-        "features": [
-            {
-                "type": "Feature",
-                "properties": {},
-                "geometry": {
-                    "type": "Polygon",
-                    "coordinates": [
-                        [
-                            [lon_min, lat_min],
-                            [lon_max, lat_min],
-                            [lon_max, lat_max],
-                            [lon_min, lat_max],
-                            [lon_min, lat_min],
-                        ]
-                    ],
-                },
-            }
-        ],
-    }
+    return square_polygon(centroid.x, centroid.y, half_width_km)
 
 
 def _area_weighted(features: list[dict], site_geom, value_key: str) -> float:
@@ -200,6 +176,7 @@ def historical_analog_forward(
     anchor_hour_time: str,  # hour of that most recent real reading
     years: list[int],
     granularity: int = 100,
+    actual_anchor_celsius: float | None = None,
 ) -> ForwardProjection:
     """Projects a likely temperature at `target_hour_time` since FortyGuard has no live
     forecast (verified live — see memory.md). Uses climatology + persistence, a standard
@@ -208,12 +185,20 @@ def historical_analog_forward(
     Every number in this projection is a real FortyGuard read; only the addition is a
     computed heuristic, not a fabricated value. `anomaly` captures "today is running N
     degrees above/below normal," carried forward to the target hour's normal.
+
+    Pass `actual_anchor_celsius` if the caller already has a real reading for
+    (`anchor_date`, `anchor_hour_time`) — e.g. from a prior `area_weighted_mean_temperature`
+    call — to skip re-querying the same real value.
     """
     target_month_day = target_date[5:]  # "MM-DD"
     anchor_month_day = anchor_date[5:]
     baseline_target = historical_baseline(client, site_polygon, target_month_day, target_hour_time, years, granularity)
     baseline_anchor = historical_baseline(client, site_polygon, anchor_month_day, anchor_hour_time, years, granularity)
-    actual_anchor = area_weighted_mean_temperature(client, site_polygon, anchor_date, anchor_hour_time, granularity)
+    if actual_anchor_celsius is None:
+        actual_anchor_celsius = area_weighted_mean_temperature(
+            client, site_polygon, anchor_date, anchor_hour_time, granularity
+        )
+    actual_anchor = actual_anchor_celsius
 
     anomaly = actual_anchor - baseline_anchor.mean_celsius
     projected = baseline_target.mean_celsius + anomaly

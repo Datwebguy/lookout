@@ -1,0 +1,26 @@
+[
+  {
+    "id": "phx-construction-01",
+    "name": "Downtown Phoenix construction site",
+    "lat": 33.4484,
+    "lon": -112.0740,
+    "worker_profile": {
+      "role": "construction laborer",
+      "shift_hours": "06:00-14:00",
+      "risk_flags": ["no shade on site", "heavy PPE"],
+      "notes": "Concrete pour crew, mostly direct sun exposure."
+    }
+  },
+  {
+    "id": "phx-delivery-01",
+    "name": "South Phoenix delivery route hub",
+    "lat": 33.4055,
+    "lon": -112.0210,
+    "worker_profile": {
+      "role": "delivery driver",
+      "shift_hours": "10:00-18:00",
+      "risk_flags": ["cardiac history"],
+      "notes": "Frequent in/out of an un-air-conditioned vehicle."
+    }
+  }
+]
