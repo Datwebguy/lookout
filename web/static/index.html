@@ -31,6 +31,18 @@
   <section class="hero">
     <div class="hero-glow" aria-hidden="true"></div>
     <div class="wrap hero-inner">
+      <div class="hero-copy">
+        <p class="eyebrow">Autonomous heat safety agent</p>
+        <h1>Lookout calls the break before the heat does.</h1>
+        <p class="hero-sub">
+          Lookout watches every worksite in real time and schedules the break before
+          anyone is actually at risk. Nobody has to ask.
+        </p>
+        <div class="hero-actions">
+          <a href="/app" class="btn btn-primary">Open the dashboard</a>
+        </div>
+        <p class="hero-meta">Real temperature data. Real reasoning. Track 06, Agentic AI.</p>
+      </div>
       <div class="hero-visual">
         <div class="heat-motif" aria-hidden="true">
           <svg viewBox="0 0 400 260" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
@@ -53,50 +65,58 @@
             </g>
           </svg>
         </div>
-      </div>
-      <div class="hero-copy">
-        <p class="eyebrow">Autonomous heat safety agent</p>
-        <h1>Lookout calls the break before the heat does.</h1>
-        <p class="hero-sub">
-          Lookout watches every worksite in real time and schedules the break before
-          anyone is actually at risk. Nobody has to ask.
-        </p>
-        <div class="hero-actions">
-          <a href="/app" class="btn btn-primary">Open the dashboard</a>
+        <div class="preview-frame" id="hero-preview">
+          <div class="preview-frame-bar">
+            <span class="preview-frame-dot" aria-hidden="true"></span>
+            <span class="preview-frame-dot" aria-hidden="true"></span>
+            <span class="preview-frame-dot" aria-hidden="true"></span>
+            <span class="preview-frame-label">Live from Lookout</span>
+          </div>
+          <div class="preview-frame-body" id="hero-preview-body">
+            <p class="live-loading">Loading a real decision.</p>
+          </div>
         </div>
-        <p class="hero-meta">Real temperature data. Real reasoning. Track 06, Agentic AI.</p>
       </div>
     </div>
   </section>
 
   <section class="section how">
     <div class="wrap">
-      <div class="section-head">
+      <div class="section-head reveal">
         <p class="eyebrow">How it works</p>
         <h2>Three real signals. One decision.</h2>
       </div>
-      <ol class="steps">
-        <li>
-          <span class="step-num" aria-hidden="true">1</span>
-          <h3>Now and ahead</h3>
-          <p>The real temperature at this exact worksite, plus what is likely coming next.</p>
-        </li>
-        <li>
-          <span class="step-num" aria-hidden="true">2</span>
-          <h3>How long</h3>
-          <p>How many hours this site has spent past a danger threshold, not just how hot it is right now.</p>
-        </li>
-        <li>
-          <span class="step-num" aria-hidden="true">3</span>
-          <h3>This worker</h3>
-          <p>Role, shift, and health flags, so the same weather can mean a different decision.</p>
-        </li>
-      </ol>
+      <div class="flow reveal">
+        <div class="flow-inputs">
+          <div class="flow-node">
+            <span class="step-num" aria-hidden="true">1</span>
+            <h3>Now and ahead</h3>
+            <p>The real temperature at this exact worksite, plus what is likely coming next.</p>
+          </div>
+          <div class="flow-node">
+            <span class="step-num" aria-hidden="true">2</span>
+            <h3>How long</h3>
+            <p>How many hours this site has spent past a danger threshold, not just how hot it is right now.</p>
+          </div>
+          <div class="flow-node">
+            <span class="step-num" aria-hidden="true">3</span>
+            <h3>This worker</h3>
+            <p>Role, shift, and health flags, so the same weather can mean a different decision.</p>
+          </div>
+        </div>
+        <div class="flow-connector" aria-hidden="true"></div>
+        <div class="flow-arrowhead" aria-hidden="true"></div>
+        <div class="flow-node flow-node-result">
+          <span class="step-num" aria-hidden="true">4</span>
+          <h3>One decision</h3>
+          <p>Risk level, the action to take, timing, and why, made for this worker.</p>
+        </div>
+      </div>
     </div>
   </section>
 
   <section class="section closing">
-    <div class="wrap">
+    <div class="wrap reveal">
       <h2>See it decide, live.</h2>
       <p class="hero-sub" style="margin-left:auto;margin-right:auto;">Every number on the dashboard is a real call, made right now.</p>
       <a href="/app" class="btn btn-primary">Open the dashboard</a>
@@ -111,5 +131,6 @@
     <span>Real data only.</span>
   </div>
 </footer>
+<script src="/static/js/landing.js"></script>
 </body>
 </html>
