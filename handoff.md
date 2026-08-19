@@ -5,7 +5,7 @@
 ---
 
 ## Current status
-- **Phase / milestone:** Milestones 1-4 complete on real data (live API proof, signals layer, autonomous scheduler loop, LLM decision policy). Milestone 4 not yet committed. Ready to start Milestone 5 (proactive action).
+- **Phase / milestone:** Milestones 1-5 complete on real data (live API proof, signals layer, autonomous scheduler loop, LLM decision policy, proactive action + logging). Milestone 5 not yet committed. Ready to start Milestone 6 (alert channel).
 - **Last updated:** 2026-08-18 by Claude (agent session)
 - **Repo:** https://github.com/Datwebguy/lookout
 - **Live demo URL:** <none yet>
@@ -34,14 +34,18 @@
   - `scripts/milestone3_scheduler_proof.py` ran clean end-to-end: tick 1 pulled real, genuinely different signals per site (construction 40.04°C vs delivery 39.81°C, different baselines/forward projections/exceedance); tick 2 (same hour) served both sites entirely from cache — zero redundant API calls, confirmed live. Committed (b3e34ba).
 - **Milestone 4 — decision policy, done for real. LLM provider changed from the originally-locked Claude/Anthropic to OpenAI (`gpt-5.6-luna`) — user preference, not a technical constraint; see Decisions below.**
   - `lookout/agent.py` — real OpenAI Responses API tool-use: `get_current_temperature`/`get_forward_and_baseline`/`get_exceedance_duration` tools, each a genuine call into `lookout/signals.py`. Two-phase design (tool-gathering loop, then a separate structured-output call) because the Responses API can't combine `tools` and `text.format` json_schema in one call.
-  - `scripts/milestone4_agent_proof.py` ran clean end-to-end, real signals + real LLM reasoning: construction site (own profile) → `risk_level: extreme`, action citing "no shade, heavy PPE, concrete pour"; SAME site polygon with the delivery driver's profile swapped in → also `extreme` (correct — genuinely extreme heat for anyone that day) but `recommended_action`/`timing`/`rationale` substantively different, citing "cardiac history" and "un-air-conditioned vehicle" instead. Delivery site on its own profile produced a third, independently-grounded real decision.
+  - `scripts/milestone4_agent_proof.py` ran clean end-to-end, real signals + real LLM reasoning: construction site (own profile) → `risk_level: extreme`, action citing "no shade, heavy PPE, concrete pour"; SAME site polygon with the delivery driver's profile swapped in → also `extreme` (correct — genuinely extreme heat for anyone that day) but `recommended_action`/`timing`/`rationale` substantively different, citing "cardiac history" and "un-air-conditioned vehicle" instead. Delivery site on its own profile produced a third, independently-grounded real decision. Committed (36109f4).
+- **Milestone 5 — proactive action + decision logging, done for real:**
+  - `Decision` (in `lookout/agent.py`) now also carries `real_inputs`: every real tool call the agent made (`{tool, args, result}`), not just its final prose — needed so the decision log has genuine real inputs, not just LLM text.
+  - `lookout/proactive.py` — `assess_proactive_action` fires only when BOTH the LLM's own `risk_level` is actionable AND the real forward-projection number it gathered crosses the threshold (code-driven check, not swayed by wording alone); pre-schedules a break window ending exactly at the projected danger hour. `AlertLog`/`DecisionLog` are real append-only JSONL files (`lookout/data/alerts.jsonl`, `lookout/data/decision_log.jsonl`, both git-ignored — runtime state).
+  - `scripts/milestone5_proactive_proof.py` ran clean end-to-end: construction site → alert fired, projected 41.7°C at 14:00, break pre-scheduled 13:30-14:00; delivery site → alert fired, projected 41.0°C at 18:00, break pre-scheduled 17:30-18:00. Both logs verified to have actually grown (0→2 lines each) by reading the files back after the run, not just trusting return values.
 
 ## In progress
 - Nothing active.
 
 ## Next up (top of the queue)
-1. Commit Milestone 4 (`lookout/agent.py`, `scripts/milestone4_agent_proof.py`, `requirements.txt` (openai, not anthropic), doc updates).
-2. Milestone 5: proactive action — detect an upcoming danger window from the historical-analog forward signal, pre-schedule a break, emit an alert *now*. Log every decision with its real inputs (the `Decision` dataclass from Milestone 4 is the natural log record).
+1. Commit Milestone 5 (`lookout/proactive.py`, `lookout/agent.py` (real_inputs field), `scripts/milestone5_proactive_proof.py`, `.gitignore`, doc updates).
+2. Milestone 6: alert channel — a real notification provider (webhook/email/SMS). `AlertLog` in `lookout/proactive.py` is already the honest fallback if a live channel can't be wired in time; Milestone 6 is about replacing/supplementing it with a genuinely external channel.
 
 ## Blockers / waiting on
 - None currently.
@@ -67,7 +71,7 @@
 - Field paths confirmed against a real response: `average_temperature`/`min_temperature`/`max_temperature` on tcm tile `properties`; `stats_data.temperature_stats.{minimum,maximum,mean,standard_deviation}` for the aggregate; no `properties.temperature`.
 - **Never query FortyGuard for today's calendar date, and treat "yesterday" as unreliable too** — use `lookout.signals.most_recent_available_date()` (3-day margin) for anything that needs to be stable, e.g. a demo. The historical-analog signal covers the "ahead" need.
 - **Never submit a small site polygon directly as the query AOI** — use `lookout.signals.area_weighted_mean_temperature`/`duration_signal`, which build a real ~2km bounding AOI automatically and area-weight against the actual site polygon. A worksite AOI under ~1.5-2km per side returns zero tiles.
-- Proof scripts live at `scripts/milestone{1,2,3,4}_*.py` — reusable for future spot-checks, run with `PYTHONPATH=<repo root> python scripts/<name>.py` (needed because the scripts aren't invoked with `-m`, so the repo root isn't auto-added to `sys.path`).
+- Proof scripts live at `scripts/milestone{1,2,3,4,5}_*.py` — reusable for future spot-checks, run with `PYTHONPATH=<repo root> python scripts/<name>.py` (needed because the scripts aren't invoked with `-m`, so the repo root isn't auto-added to `sys.path`).
 - Registered sites live in `lookout/data/sites.json` (tracked in git); the per-site-per-hour cache lives alongside it at `lookout/data/signal_cache.json` (git-ignored — real runtime state, not source).
 - `.env` now needs `OPENAI_API_KEY` (not `ANTHROPIC_API_KEY` — CLAUDE.md updated). Never paste a raw key into chat — write it directly into `.env` yourself; a key pasted into a conversation is in that transcript permanently.
 
@@ -98,5 +102,10 @@
 [2026-08-18, part 5] Claude (agent session)
 - Did: User asked to switch the LLM provider from Claude/Anthropic to OpenAI mid-build (explicitly a preference, not a FortyGuard requirement) and specifically requested the cheapest available tier. Verified current OpenAI API patterns live (WebFetch against developers.openai.com — Responses API, function-calling tool shape, structured-output text.format, since training-data model names like gpt-4o are stale) rather than guessing, and verified real gpt-5.6-sol/terra/luna pricing before picking luna ($0.20/$1.20 per 1M — cheapest). Updated the locked LLM decision in memory.md, CLAUDE.md, architecture.md. Installed openai SDK, removed anthropic from requirements.txt. Wrote lookout/agent.py (two-phase: tool-gathering loop, then structured-output call — OpenAI's Responses API can't combine tools + text.format in one call, unlike Claude) and scripts/milestone4_agent_proof.py. User pasted their raw OpenAI key directly into chat; wrote it to .env without echoing it back and flagged that pasting secrets into chat isn't ideal (already logged in the transcript regardless). Ran the proof end-to-end against real FortyGuard + OpenAI: 3 real decisions, confirmed personalization works (same site + swapped profile → same risk_level "extreme" but substantively different action/timing/rationale, each correctly citing the specific worker's real risk factors).
 - Learned / decided: OpenAI's Responses API architecture forces a two-call pattern (gather via tools, then format via schema) where Claude's API would allow one combined call — documented in memory.md so future work on lookout/agent.py doesn't assume the Claude-style combined pattern. Real proof cost was a few cents total on the luna tier.
-- Left for next: Milestone 5 (proactive action) — detect an upcoming danger window from the historical-analog forward signal already computed in lookout/agent.py's get_forward_and_baseline tool, pre-schedule a break, emit an alert now, log every decision with its real inputs. Not yet committed.
+- Left for next: Milestone 5 (proactive action). Committed Milestone 4 (36109f4).
+
+[2026-08-18, part 6] Claude (agent session)
+- Did: Built Milestone 5. Added `real_inputs` field to `Decision` (in `lookout/agent.py`) and populated it during the tool-gathering loop — every `{tool, args, result}` the agent actually called, so the decision log has genuine real inputs, not just the LLM's final prose. Wrote `lookout/proactive.py`: `assess_proactive_action` (fires only when the LLM's risk_level AND the real forward-projection number both cross the threshold — code-driven, not swayed by wording alone; pre-schedules a break ending exactly at the projected danger hour), `AlertLog` and `DecisionLog` (real append-only JSONL files, git-ignored as runtime state). Wrote `scripts/milestone5_proactive_proof.py` and ran it against real FortyGuard + OpenAI for both registered sites.
+- Learned / decided: Both real sites triggered a genuine proactive alert (construction: 41.7°C projected at 14:00, break pre-scheduled 13:30-14:00; delivery: 41.0°C at 18:00, break pre-scheduled 17:30-18:00) — verified the decision log and alert log actually grew by reading the files back after the run, not just trusting return values. The proactive trigger requiring BOTH the LLM's own risk assessment AND a real threshold-crossing number (not either alone) keeps it grounded in real data rather than exploitable by vague LLM wording.
+- Left for next: Milestone 6 (alert channel) — a real external notification provider (webhook/email/SMS); `AlertLog` is already the honest visible-log fallback CLAUDE.md permits if a live channel can't be wired in time. Not yet committed.
 ```

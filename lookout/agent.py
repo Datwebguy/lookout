@@ -12,7 +12,7 @@ see memory.md): (1) a tool-use gathering loop until the model stops calling tool
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date, timedelta
 
 from fortyguard import FortyGuardClient
@@ -64,6 +64,10 @@ class Decision:
     site_id: str
     site_name: str
     worker_role: str
+    # Every real tool call the agent made to reach this decision — {"tool", "args", "result"}
+    # per call — so the decision log can show the real inputs, not just the LLM's prose
+    # (PRD FR6). Never fabricated: populated only from actual FortyGuard-backed tool results.
+    real_inputs: list[dict] = field(default_factory=list)
 
 
 def _make_tools(client: FortyGuardClient, site: Site, anchor_date: str, baseline_years: list[int]):
@@ -202,6 +206,7 @@ def decide(
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": user_prompt},
     ]
+    real_inputs: list[dict] = []
 
     # Phase 1 — tool-use gathering loop: keep going until the model stops calling tools.
     for _ in range(max_tool_iterations):
@@ -220,6 +225,7 @@ def decide(
             executor = executors[call.name]
             args = json.loads(call.arguments)
             result = executor(**args)
+            real_inputs.append({"tool": call.name, "args": args, "result": json.loads(result)})
             input_list.append({
                 "type": "function_call_output",
                 "call_id": call.call_id,
@@ -254,4 +260,5 @@ def decide(
         site_id=site.id,
         site_name=site.name,
         worker_role=site.worker_profile.role,
+        real_inputs=real_inputs,
     )

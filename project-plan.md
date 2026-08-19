@@ -32,9 +32,9 @@
 - [x] Prompt + schema → `{risk_level, recommended_action, timing, rationale}`, personalized by worker profile. Structured output via `text.format` json_schema.
 - [x] Prove the same site yields different actions for different profiles. Real result: same construction-site polygon, swapped worker profile (construction laborer vs. delivery driver with cardiac history) → both rated `risk_level: extreme` (correct — genuinely extreme heat for anyone), but `recommended_action`/`timing`/`rationale` differed substantively, each correctly citing the specific worker's real risk factors.
 
-## Milestone 5 — Proactive action
-- [ ] Detect an upcoming danger window (from historical-analog) and pre-schedule a break + emit an alert *now*.
-- [ ] Log every autonomous decision with its real inputs.
+## Milestone 5 — Proactive action — ✅ DONE 2026-08-18
+- [x] Detect an upcoming danger window (from historical-analog) and pre-schedule a break + emit an alert *now*. `lookout/proactive.py` — `assess_proactive_action` fires only when both the LLM's own risk_level AND the real forward-projection number cross the threshold (code-driven, not just LLM wording). Real result: construction site → alert fired, projected 41.7°C at 14:00, break pre-scheduled 13:30-14:00; delivery site → alert fired, projected 41.0°C at 18:00, break pre-scheduled 17:30-18:00 — both breaks scheduled to end exactly at the danger hour, genuinely proactive.
+- [x] Log every autonomous decision with its real inputs. `DecisionLog`/`AlertLog` in `lookout/proactive.py`, JSONL append-only. Verified live: both logs grew from 0 to 2 real entries in one run, confirmed by reading the files back.
 
 ## Milestone 6 — Alert channel
 - [ ] Real notification out (webhook/email/SMS via a real provider). If not wired in time, a real visible alert log — never a faked "sent".
