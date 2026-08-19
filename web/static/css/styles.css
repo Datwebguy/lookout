@@ -268,6 +268,7 @@ button { font: inherit; }
   align-items: center;
   gap: 10px;
 }
+.run-status[hidden] { display: none; }
 .run-status.is-error { border-color: var(--risk-extreme); color: var(--risk-extreme); }
 .run-status.is-success { border-color: var(--risk-low); color: var(--risk-low); }
 .spinner {
