@@ -32,7 +32,7 @@ Real intelligence, no theater. Every number and decision the demo shows must com
 
 ## Design decisions (locked)
 - Primary user = outdoor worker; buyer = city/employer. Demo city = **Phoenix, AZ** (e.g. 33.4484, -112.0740).
-- Language = Python; LLM = Claude via Anthropic API with tool-use.
+- Language = Python; LLM = OpenAI (`gpt-5.6`, Responses API) with tool-use. Changed from the original Claude/Anthropic choice on 2026-08-18 — user preference, not a FortyGuard requirement. Design: a tool-use gathering loop (real signals via `lookout/signals.py`), then one final structured-output call (`text.format` json_schema) — OpenAI's Responses API treats `tools` and `text.format` as mutually exclusive in a single call, unlike Claude's combined pattern.
 - Reason over: now (tcm) · ahead (historical analog — forecast confirmed unavailable) · baseline · duration (exceedance) · worker profile.
 - Tracks: primary Agentic (06); secondary Cities (01), Government (04).
 

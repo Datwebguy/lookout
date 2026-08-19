@@ -31,7 +31,7 @@
 ## 2. Components
 - **FortyGuard client layer** — thin wrapper over the official `fortyguard` Python client (from the Quickstart template). The ONLY place that talks to the API. Exposes: current temperature for a site, a historical-analog forward signal, a historical baseline, and a duration/exceedance read.
 - **Scheduler** — loops over registered sites on an interval; the source of autonomy.
-- **Agent** — LLM (Claude via Anthropic API) with tool-use; receives real inputs, returns a structured decision.
+- **Agent** — LLM (OpenAI `gpt-5.6`, Responses API) with tool-use; receives real inputs, returns a structured decision. Two-phase: a tool-use gathering loop over real signals, then a final structured-output call.
 - **Decision policy** — the prompt + schema that turns inputs + worker profile into `{risk_level, recommended_action, timing, rationale}`.
 - **Alert channel** — real notification out; falls back to a real visible log.
 - **Decision log** — persists every decision with the real inputs that produced it (proof the agent is real).
@@ -75,7 +75,7 @@ The hackathon FAQ/Slack claimed heatmaps forecast up to 12h ahead; the Quickstar
 
 ## 7. Tech stack
 - **Python** (fastest path for an LLM tool-calling agent; pairs with the official client). Node/TS acceptable if the team prefers — keep the same structure.
-- **LLM:** Claude via Anthropic API, tool-use for FortyGuard calls.
+- **LLM:** OpenAI (`gpt-5.6`, Responses API), tool-use for FortyGuard calls.
 - **UI:** minimal (a lightweight web feed + per-worker view). The agent is the star, not chrome.
 - **Persistence:** simple store for sites + decision log (SQLite/JSON is fine for the sprint).
 

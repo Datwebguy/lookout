@@ -93,7 +93,7 @@ Tested with the real key against `create_heatmap` (`tcm`, `filter_type=1`, granu
 
 ## 5. Tech stack
 - **Language: Python** (fastest path for an LLM tool-calling agent). *If the team prefers Node/TypeScript, switch — but keep the same structure and rules.*
-- LLM: Claude via the Anthropic API, using tool-use for the FortyGuard calls.
+- LLM: OpenAI (`gpt-5.6`, Responses API), using tool-use for the FortyGuard calls. Changed from Claude/Anthropic on 2026-08-18 (user preference — see memory.md). OpenAI's Responses API can't combine `tools` and structured-output `text.format` in one call, so the agent runs a tool-use gathering loop first, then a final structured-output call to produce the decision.
 - HTTP client for FortyGuard. Scheduler via a simple loop / async task.
 - UI: keep minimal — a live feed of autonomous decisions + a per-worker detail view. The star is the agent, not chrome.
 
@@ -105,7 +105,7 @@ All FortyGuard and LLM config comes from environment variables. **Do not paste k
 ```
 FORTYGUARD_API_KEY   = fg_live_...   (generate at dashboard.fortyguard.com → Profile → Create API Key; git-ignored, server-side only)
 FORTYGUARD_BASE_URL  = https://api.fortyguard.com   (dev override: https://tos-enterprise-api.dev.app.fortyguard.com)
-ANTHROPIC_API_KEY    = <Anthropic key>
+OPENAI_API_KEY       = <OpenAI key>
 ```
 
 **Build on the official `fortyguard` Python client — don't hand-roll HTTP.** Repo created from the Quickstart template (github.com/FortyGuard-Tech/temperature-api-quickstart), which ships the client under `fortyguard/` and handles submit-and-poll for you.

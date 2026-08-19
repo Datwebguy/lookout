@@ -5,7 +5,7 @@
 ---
 
 ## Current status
-- **Phase / milestone:** Milestones 1-3 complete on real data (live API proof, signals layer, autonomous scheduler loop). Milestone 3 not yet committed. Ready to start Milestone 4 (decision policy / LLM tool-use).
+- **Phase / milestone:** Milestones 1-4 complete on real data (live API proof, signals layer, autonomous scheduler loop, LLM decision policy). Milestone 4 not yet committed. Ready to start Milestone 5 (proactive action).
 - **Last updated:** 2026-08-18 by Claude (agent session)
 - **Repo:** https://github.com/Datwebguy/lookout
 - **Live demo URL:** <none yet>
@@ -31,19 +31,23 @@
   - `lookout/sites.py` + `lookout/data/sites.json` — 2 real registered Phoenix sites with distinct worker profiles (construction laborer, delivery driver).
   - `lookout/cache.py` — per-site-per-hour JSON cache.
   - `lookout/scheduler.py` — `Scheduler.tick()` runs one real autonomous pass over every registered site (no human prompt per site); `run_forever()` is the real deployment loop.
-  - `scripts/milestone3_scheduler_proof.py` ran clean end-to-end: tick 1 pulled real, genuinely different signals per site (construction 40.04°C vs delivery 39.81°C, different baselines/forward projections/exceedance); tick 2 (same hour) served both sites entirely from cache — zero redundant API calls, confirmed live.
+  - `scripts/milestone3_scheduler_proof.py` ran clean end-to-end: tick 1 pulled real, genuinely different signals per site (construction 40.04°C vs delivery 39.81°C, different baselines/forward projections/exceedance); tick 2 (same hour) served both sites entirely from cache — zero redundant API calls, confirmed live. Committed (b3e34ba).
+- **Milestone 4 — decision policy, done for real. LLM provider changed from the originally-locked Claude/Anthropic to OpenAI (`gpt-5.6-luna`) — user preference, not a technical constraint; see Decisions below.**
+  - `lookout/agent.py` — real OpenAI Responses API tool-use: `get_current_temperature`/`get_forward_and_baseline`/`get_exceedance_duration` tools, each a genuine call into `lookout/signals.py`. Two-phase design (tool-gathering loop, then a separate structured-output call) because the Responses API can't combine `tools` and `text.format` json_schema in one call.
+  - `scripts/milestone4_agent_proof.py` ran clean end-to-end, real signals + real LLM reasoning: construction site (own profile) → `risk_level: extreme`, action citing "no shade, heavy PPE, concrete pour"; SAME site polygon with the delivery driver's profile swapped in → also `extreme` (correct — genuinely extreme heat for anyone that day) but `recommended_action`/`timing`/`rationale` substantively different, citing "cardiac history" and "un-air-conditioned vehicle" instead. Delivery site on its own profile produced a third, independently-grounded real decision.
 
 ## In progress
 - Nothing active.
 
 ## Next up (top of the queue)
-1. Commit Milestone 3 (`lookout/sites.py`, `lookout/cache.py`, `lookout/scheduler.py`, `lookout/geo.py`, `lookout/data/sites.json`, `scripts/milestone3_scheduler_proof.py`, doc updates).
-2. Milestone 4: decision policy — LLM tool-use over the signals layer, `{risk_level, recommended_action, timing, rationale}`, personalized by worker profile. Prove the same site yields different actions for different profiles (the two registered sites already have deliberately different profiles for this).
+1. Commit Milestone 4 (`lookout/agent.py`, `scripts/milestone4_agent_proof.py`, `requirements.txt` (openai, not anthropic), doc updates).
+2. Milestone 5: proactive action — detect an upcoming danger window from the historical-analog forward signal, pre-schedule a break, emit an alert *now*. Log every decision with its real inputs (the `Decision` dataclass from Milestone 4 is the natural log record).
 
 ## Blockers / waiting on
 - None currently.
 
 ## Decisions made (most recent first)
+- **LLM provider = OpenAI (`gpt-5.6-luna`), not Claude/Anthropic.** User preference, changed 2026-08-18 mid-build — not a FortyGuard or technical requirement. `gpt-5.6-luna` chosen specifically for cost ($0.20/$1.20 per 1M tokens vs $5/$30 flagship `gpt-5.6-sol`) per explicit user request; verified pricing and exact model-ID strings live against the OpenAI docs rather than guessing. Real proof cost was a few cents total. Uses the Responses API (`client.responses.create`), not Chat Completions.
 - **Signals layer always submits a ~2km bounding query AOI, never the raw site polygon.** Live testing found a real minimum query-area threshold: a small worksite polygon (200m up to 1.5km per side) returns zero tiles even on dates otherwise 100% reliable (confirmed on 2024-07-15 and 2026-08-15, both proven reliable with a larger box); a ~2km box works consistently. `lookout/signals.py` now builds a `_bounding_query_aoi` around the site's centroid for every API call, then area-weights the *result* against the real (smaller) site polygon — this was the actual root cause of what first looked like a live outage.
 - **Use a 3-day safety margin for "the most recent available date," not 1 day.** Live testing showed "yesterday" is NOT reliably available — it returned real data multiple times early in a session, then returned empty on an identical retry later, while dates 3+ days old stayed consistently available throughout. `most_recent_available_date()` defaults to `today - 3 days`.
 - **Forecast mechanism = historical-analog, not live forecast** (see Open questions below for the evidence). This changes every downstream milestone that touches "ahead"/"forward" signal — always use historical-analog, never attempt to query today's date expecting real-time or near-future data.
@@ -63,8 +67,9 @@
 - Field paths confirmed against a real response: `average_temperature`/`min_temperature`/`max_temperature` on tcm tile `properties`; `stats_data.temperature_stats.{minimum,maximum,mean,standard_deviation}` for the aggregate; no `properties.temperature`.
 - **Never query FortyGuard for today's calendar date, and treat "yesterday" as unreliable too** — use `lookout.signals.most_recent_available_date()` (3-day margin) for anything that needs to be stable, e.g. a demo. The historical-analog signal covers the "ahead" need.
 - **Never submit a small site polygon directly as the query AOI** — use `lookout.signals.area_weighted_mean_temperature`/`duration_signal`, which build a real ~2km bounding AOI automatically and area-weight against the actual site polygon. A worksite AOI under ~1.5-2km per side returns zero tiles.
-- Proof scripts live at `scripts/milestone{1,2,3}_*.py` — reusable for future spot-checks, run with `PYTHONPATH=<repo root> python scripts/<name>.py` (needed because the scripts aren't invoked with `-m`, so the repo root isn't auto-added to `sys.path`).
+- Proof scripts live at `scripts/milestone{1,2,3,4}_*.py` — reusable for future spot-checks, run with `PYTHONPATH=<repo root> python scripts/<name>.py` (needed because the scripts aren't invoked with `-m`, so the repo root isn't auto-added to `sys.path`).
 - Registered sites live in `lookout/data/sites.json` (tracked in git); the per-site-per-hour cache lives alongside it at `lookout/data/signal_cache.json` (git-ignored — real runtime state, not source).
+- `.env` now needs `OPENAI_API_KEY` (not `ANTHROPIC_API_KEY` — CLAUDE.md updated). Never paste a raw key into chat — write it directly into `.env` yourself; a key pasted into a conversation is in that transcript permanently.
 
 ---
 
@@ -88,5 +93,10 @@
 [2026-08-18, part 4] Claude (agent session)
 - Did: Built Milestone 3 — lookout/geo.py (shared square_polygon helper, refactored out of signals.py to avoid duplicating the same trig math in the sites module), lookout/sites.py (Site/WorkerProfile dataclasses, JSON load/save), lookout/cache.py (per-site-per-hour JSON cache), lookout/scheduler.py (compute_site_signals + Scheduler.tick()/run_forever()). Registered 2 real Phoenix sites with deliberately different worker profiles in lookout/data/sites.json. Added actual_anchor_celsius reuse param to historical_analog_forward so the scheduler doesn't re-query a value it already has. Ran scripts/milestone3_scheduler_proof.py against the real API: tick 1 produced genuinely different real signals per site; tick 2 (same hour) hit cache for both sites with zero new calls.
 - Learned / decided: The autonomy mechanism (Scheduler.tick(), no per-site human trigger) and credit-respecting cache both work correctly against real multi-site data. Worker profiles are stored and loaded but don't yet influence the computed signals themselves (by design — that differentiation happens in Milestone 4's LLM decision layer, not the signals layer).
-- Left for next: Milestone 4 (decision policy) — LLM tool-use over lookout/signals.py + lookout/scheduler.py, prompt + schema producing {risk_level, recommended_action, timing, rationale}, proving the two already-registered sites/profiles yield different actions. Not yet committed.
+- Left for next: Milestone 4 (decision policy). Committed Milestone 3 (b3e34ba).
+
+[2026-08-18, part 5] Claude (agent session)
+- Did: User asked to switch the LLM provider from Claude/Anthropic to OpenAI mid-build (explicitly a preference, not a FortyGuard requirement) and specifically requested the cheapest available tier. Verified current OpenAI API patterns live (WebFetch against developers.openai.com — Responses API, function-calling tool shape, structured-output text.format, since training-data model names like gpt-4o are stale) rather than guessing, and verified real gpt-5.6-sol/terra/luna pricing before picking luna ($0.20/$1.20 per 1M — cheapest). Updated the locked LLM decision in memory.md, CLAUDE.md, architecture.md. Installed openai SDK, removed anthropic from requirements.txt. Wrote lookout/agent.py (two-phase: tool-gathering loop, then structured-output call — OpenAI's Responses API can't combine tools + text.format in one call, unlike Claude) and scripts/milestone4_agent_proof.py. User pasted their raw OpenAI key directly into chat; wrote it to .env without echoing it back and flagged that pasting secrets into chat isn't ideal (already logged in the transcript regardless). Ran the proof end-to-end against real FortyGuard + OpenAI: 3 real decisions, confirmed personalization works (same site + swapped profile → same risk_level "extreme" but substantively different action/timing/rationale, each correctly citing the specific worker's real risk factors).
+- Learned / decided: OpenAI's Responses API architecture forces a two-call pattern (gather via tools, then format via schema) where Claude's API would allow one combined call — documented in memory.md so future work on lookout/agent.py doesn't assume the Claude-style combined pattern. Real proof cost was a few cents total on the luna tier.
+- Left for next: Milestone 5 (proactive action) — detect an upcoming danger window from the historical-analog forward signal already computed in lookout/agent.py's get_forward_and_baseline tool, pre-schedule a break, emit an alert now, log every decision with its real inputs. Not yet committed.
 ```

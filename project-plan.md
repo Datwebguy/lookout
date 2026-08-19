@@ -27,10 +27,10 @@
 - [x] Scheduler iterates sites on an interval and calls the signals layer per site — no human prompt triggers it. `lookout/scheduler.py` — `tick()` for one autonomous pass, `run_forever()` for real deployment. Real result: construction site 40.04°C vs delivery hub 39.81°C — genuinely different real readings per site in one autonomous pass.
 - [x] Per-site caching (per hour) to respect credits. `lookout/cache.py` — confirmed live: tick 2 (same hour) served both sites from cache, zero new API calls.
 
-## Milestone 4 — Decision policy (the reasoning; where we win)
-- [ ] LLM tool-use: agent calls the FortyGuard client as a tool.
-- [ ] Prompt + schema → `{risk_level, recommended_action, timing, rationale}`, personalized by worker profile.
-- [ ] Prove the same site yields different actions for different profiles.
+## Milestone 4 — Decision policy (the reasoning; where we win) — ✅ DONE 2026-08-18
+- [x] LLM tool-use: agent calls the FortyGuard client as a tool. `lookout/agent.py` — OpenAI `gpt-5.6-luna`, Responses API, real `get_current_temperature`/`get_forward_and_baseline`/`get_exceedance_duration` tools bound to `lookout/signals.py`.
+- [x] Prompt + schema → `{risk_level, recommended_action, timing, rationale}`, personalized by worker profile. Structured output via `text.format` json_schema.
+- [x] Prove the same site yields different actions for different profiles. Real result: same construction-site polygon, swapped worker profile (construction laborer vs. delivery driver with cardiac history) → both rated `risk_level: extreme` (correct — genuinely extreme heat for anyone), but `recommended_action`/`timing`/`rationale` differed substantively, each correctly citing the specific worker's real risk factors.
 
 ## Milestone 5 — Proactive action
 - [ ] Detect an upcoming danger window (from historical-analog) and pre-schedule a break + emit an alert *now*.
