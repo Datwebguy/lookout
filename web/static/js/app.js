@@ -238,7 +238,62 @@ function wireRunButton() {
   });
 }
 
+function wireAddSiteForm() {
+  const form = document.getElementById("add-site-form");
+  if (!form) return;
+  const statusEl = document.getElementById("add-site-status");
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const data = new FormData(form);
+    const riskFlagsRaw = (data.get("risk_flags") || "").toString().trim();
+
+    const payload = {
+      name: (data.get("name") || "").toString().trim(),
+      lat: parseFloat(data.get("lat")),
+      lon: parseFloat(data.get("lon")),
+      worker_profile: {
+        role: (data.get("role") || "").toString().trim(),
+        shift_hours: (data.get("shift_hours") || "").toString().trim(),
+        risk_flags: riskFlagsRaw ? riskFlagsRaw.split(",").map((s) => s.trim()).filter(Boolean) : [],
+        notes: (data.get("notes") || "").toString().trim(),
+      },
+      slack_webhook_url: (data.get("slack_webhook_url") || "").toString().trim() || null,
+      discord_webhook_url: (data.get("discord_webhook_url") || "").toString().trim() || null,
+    };
+
+    if (!payload.name || Number.isNaN(payload.lat) || Number.isNaN(payload.lon) || !payload.worker_profile.role || !payload.worker_profile.shift_hours) {
+      statusEl.className = "form-status is-error";
+      statusEl.textContent = "Fill in site name, latitude, longitude, role, and shift hours.";
+      return;
+    }
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    statusEl.className = "form-status";
+    statusEl.textContent = "Registering the site.";
+
+    try {
+      await fetchJSON("/api/sites", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      statusEl.className = "form-status is-success";
+      statusEl.textContent = "Site registered. It will get its first decision on the next live check.";
+      form.reset();
+      await loadAll();
+    } catch (err) {
+      statusEl.className = "form-status is-error";
+      statusEl.textContent = `Could not register the site: ${err.message}`;
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   loadAll();
   wireRunButton();
+  wireAddSiteForm();
 });

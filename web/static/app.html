@@ -55,6 +55,55 @@
     <section class="panel" id="sites">
       <h2>Registered sites</h2>
       <p class="panel-sub">Each worker gets a decision built for them.</p>
+
+      <details class="add-site">
+        <summary>Add a site</summary>
+        <form id="add-site-form" class="site-form" novalidate>
+          <div class="form-row">
+            <label for="site-name">Site name</label>
+            <input id="site-name" name="name" type="text" required maxlength="120" placeholder="Example: North Yard Warehouse" />
+          </div>
+          <div class="form-row form-row-split">
+            <div>
+              <label for="site-lat">Latitude</label>
+              <input id="site-lat" name="lat" type="number" step="any" min="-90" max="90" required placeholder="33.4484" />
+            </div>
+            <div>
+              <label for="site-lon">Longitude</label>
+              <input id="site-lon" name="lon" type="number" step="any" min="-180" max="180" required placeholder="-112.0740" />
+            </div>
+          </div>
+          <div class="form-row">
+            <label for="site-role">Worker role</label>
+            <input id="site-role" name="role" type="text" required maxlength="100" placeholder="Example: roofer" />
+          </div>
+          <div class="form-row">
+            <label for="site-shift">Shift hours</label>
+            <input id="site-shift" name="shift_hours" type="text" required maxlength="30" placeholder="07:00 to 15:00" />
+          </div>
+          <div class="form-row">
+            <label for="site-flags">Health or risk flags</label>
+            <input id="site-flags" name="risk_flags" type="text" placeholder="Separate with commas, optional" />
+          </div>
+          <div class="form-row">
+            <label for="site-notes">Notes</label>
+            <input id="site-notes" name="notes" type="text" maxlength="300" placeholder="Optional" />
+          </div>
+          <div class="form-row">
+            <label for="site-slack">Slack webhook for this site</label>
+            <input id="site-slack" name="slack_webhook_url" type="url" placeholder="Optional, defaults to the shared channel" />
+          </div>
+          <div class="form-row">
+            <label for="site-discord">Discord webhook for this site</label>
+            <input id="site-discord" name="discord_webhook_url" type="url" placeholder="Optional, defaults to the shared channel" />
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Register site</button>
+            <span id="add-site-status" class="form-status" role="status" aria-live="polite"></span>
+          </div>
+        </form>
+      </details>
+
       <div class="site-grid" id="site-grid">
         <p class="live-loading">Loading sites.</p>
       </div>

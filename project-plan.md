@@ -49,6 +49,8 @@
 - [x] Every hyphen and dash removed from all page copy per explicit user request (real LLM decision text in the feed is left untouched — that's real data, not copy).
 - [x] Fixed a real UX issue the user found by using the app themselves: the site cards / feed didn't visibly change while "Run a live check" was in progress, so it looked stuck even though a real ~2 minute cycle was genuinely running. Added a dimmed "updating" state plus a spinner and clearer status copy.
 - [x] Verified in real headless-Chromium renders at desktop/tablet/mobile on both pages: no console errors, no horizontal overflow at any width, visible keyboard focus outlines, WCAG contrast checked programmatically (worst real case 6.41:1 against the button gradient's lightest point).
+- [x] Fixed a real bug the user's "so bad, not aligned" complaint pointed to: `.run-status` had `display: flex` in CSS, which overrode the browser's default `[hidden]` behavior, so an empty outlined box rendered on every page load. Added `.run-status[hidden] { display: none; }`.
+- [x] Minimal self-serve onboarding added (the "how do users set things up" gap): a real "Add a site" form on `/app` — registers a site + worker profile + optional per-site Slack/Discord webhook straight into `lookout/data/sites.json` via a new `POST /api/sites`, no login required. Deliberately scoped below full accounts (a multi-day build not worth the remaining time) but above "narrate it in the demo" (the user wanted it real). Verified with a real end-to-end Playwright test: filled the form, submitted, confirmed the new site appeared via a live re-fetch and was actually persisted to disk.
 
 ## Milestone 8 — Harden + rehearse
 - [ ] Real end-to-end runs on Phoenix coordinates, repeatedly.

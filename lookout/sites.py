@@ -28,6 +28,10 @@ class Site:
     lon: float
     worker_profile: WorkerProfile
     site_polygon: dict | None = None  # real small worksite footprint; derived if omitted
+    # Optional per-site alert channel override. None means "use the server's default
+    # SLACK_WEBHOOK_URL / DISCORD_WEBHOOK_URL" (see lookout/notify.py).
+    slack_webhook_url: str | None = None
+    discord_webhook_url: str | None = None
 
     def __post_init__(self) -> None:
         if isinstance(self.worker_profile, dict):
@@ -53,6 +57,8 @@ def save_sites(sites: list[Site], path: str | Path) -> None:
             "lon": s.lon,
             "worker_profile": asdict(s.worker_profile),
             "site_polygon": s.site_polygon,
+            "slack_webhook_url": s.slack_webhook_url,
+            "discord_webhook_url": s.discord_webhook_url,
         }
         for s in sites
     ]

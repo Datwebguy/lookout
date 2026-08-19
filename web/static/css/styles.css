@@ -317,6 +317,50 @@ button { font: inherit; }
 .site-card-action { font-size: 0.88rem; color: var(--text-secondary); margin: 10px 0 0; }
 .site-card-empty { color: var(--text-muted); font-size: 0.86rem; }
 
+/* Add-site form */
+.add-site {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+.add-site summary {
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--blue-300);
+  list-style: none;
+}
+.add-site summary::-webkit-details-marker { display: none; }
+.add-site summary::before { content: "+ "; }
+.add-site[open] summary::before { content: "\2212 "; }
+.site-form { margin-top: 18px; display: flex; flex-direction: column; gap: 14px; }
+.form-row { display: flex; flex-direction: column; gap: 6px; }
+.form-row-split { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-row-split > div { display: flex; flex-direction: column; gap: 6px; }
+@media (max-width: 480px) {
+  .form-row-split { grid-template-columns: 1fr; }
+}
+.site-form label { font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; }
+.site-form input {
+  width: 100%;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--text-primary);
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 0.7em 0.9em;
+  min-height: 44px;
+}
+.site-form input::placeholder { color: var(--text-muted); }
+.site-form input:focus-visible { outline: 2px solid var(--blue-300); outline-offset: 1px; }
+.form-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 4px; }
+.form-status { font-size: 0.88rem; color: var(--text-muted); }
+.form-status.is-error { color: var(--risk-extreme); }
+.form-status.is-success { color: var(--risk-low); }
+
 .feed { display: flex; flex-direction: column; gap: 10px; transition: opacity 0.2s ease; }
 .feed-item { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 16px 18px; }
 .feed-item-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; justify-content: space-between; }

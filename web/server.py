@@ -9,6 +9,7 @@ JSONL logs Milestones 4-6 already produce, and /api/run triggers a genuine auton
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -22,10 +23,11 @@ from fastapi.staticfiles import StaticFiles  # noqa: E402
 from fortyguard import FortyGuardClient  # noqa: E402
 from fortyguard.exceptions import FortyGuardError  # noqa: E402
 from openai import OpenAI  # noqa: E402
+from pydantic import BaseModel, Field  # noqa: E402
 
 from lookout.notify import DeliveryLog, WebhookNotifier  # noqa: E402
 from lookout.proactive import AlertLog, DecisionLog, decide_and_act  # noqa: E402
-from lookout.sites import load_sites  # noqa: E402
+from lookout.sites import Site, WorkerProfile, load_sites, save_sites  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = REPO_ROOT / "lookout" / "data"
@@ -71,9 +73,62 @@ def get_sites() -> list[dict]:
                 "risk_flags": s.worker_profile.risk_flags,
                 "notes": s.worker_profile.notes,
             },
+            # Never echo the real webhook URL back to the client — this dashboard has
+            # no login, so anyone with the link could read and reuse it. Booleans only.
+            "has_slack_webhook": bool(s.slack_webhook_url),
+            "has_discord_webhook": bool(s.discord_webhook_url),
         }
         for s in sites
     ]
+
+
+class WorkerProfileIn(BaseModel):
+    role: str = Field(min_length=1, max_length=100)
+    shift_hours: str = Field(min_length=1, max_length=30)
+    risk_flags: list[str] = Field(default_factory=list)
+    notes: str = ""
+
+
+class SiteIn(BaseModel):
+    name: str = Field(min_length=1, max_length=120)
+    lat: float = Field(ge=-90, le=90)
+    lon: float = Field(ge=-180, le=180)
+    worker_profile: WorkerProfileIn
+    slack_webhook_url: str | None = None
+    discord_webhook_url: str | None = None
+
+
+def _slugify(name: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+    return slug or "site"
+
+
+@app.post("/api/sites", status_code=201)
+def create_site(payload: SiteIn) -> dict:
+    """Register a real new site. Writes straight into the same sites.json the
+    scheduler/dashboard reads from — no separate mock store.
+    """
+    sites = load_sites(SITES_PATH)
+    existing_ids = {s.id for s in sites}
+    base_id = _slugify(payload.name)
+    site_id = base_id
+    suffix = 1
+    while site_id in existing_ids:
+        suffix += 1
+        site_id = f"{base_id}-{suffix}"
+
+    new_site = Site(
+        id=site_id,
+        name=payload.name,
+        lat=payload.lat,
+        lon=payload.lon,
+        worker_profile=WorkerProfile(**payload.worker_profile.model_dump()),
+        slack_webhook_url=payload.slack_webhook_url or None,
+        discord_webhook_url=payload.discord_webhook_url or None,
+    )
+    sites.append(new_site)
+    save_sites(sites, SITES_PATH)
+    return {"id": new_site.id, "name": new_site.name}
 
 
 @app.get("/api/decisions")
@@ -102,7 +157,6 @@ def run_now() -> dict:
     sites = load_sites(SITES_PATH)
     decision_log = DecisionLog(DECISION_LOG_PATH)
     alert_log = AlertLog(ALERT_LOG_PATH)
-    notifier = WebhookNotifier()
     delivery_log = DeliveryLog(DELIVERY_LOG_PATH)
 
     results = []
@@ -118,6 +172,10 @@ def run_now() -> dict:
 
         delivery = None
         if alert is not None:
+            # A site's own webhook (if it has one) wins over the server-wide default.
+            notifier = WebhookNotifier(
+                slack_url=site.slack_webhook_url, discord_url=site.discord_webhook_url,
+            )
             delivery_results = notifier.send(alert)
             delivery_log.append(alert, delivery_results)
             delivery = [{"channel": r.channel, "sent": r.sent, "configured": r.configured, "detail": r.detail} for r in delivery_results]
