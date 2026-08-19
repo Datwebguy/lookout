@@ -1,0 +1,252 @@
+// Lookout dashboard — fetches only real data from the backend. No mocked values here:
+// every number rendered on this page came from a real FortyGuard/OpenAI call logged by
+// the Python agent.
+
+const RISK_CLASS = {
+  low: "risk-low",
+  moderate: "risk-moderate",
+  high: "risk-high",
+  extreme: "risk-extreme",
+};
+
+function riskBadge(riskLevel) {
+  const cls = RISK_CLASS[riskLevel] || "risk-moderate";
+  const span = document.createElement("span");
+  span.className = `risk-badge ${cls}`;
+  span.textContent = riskLevel ? riskLevel.toUpperCase() : "UNKNOWN";
+  return span;
+}
+
+function extractNowReading(decision) {
+  const inputs = decision.real_inputs || [];
+  const temps = inputs.filter((i) => i.tool === "get_current_temperature" && i.result && i.result.celsius != null);
+  if (temps.length) return temps[temps.length - 1].result.celsius;
+  const forward = inputs.find((i) => i.tool === "get_forward_and_baseline" && i.result && i.result.actual_now_celsius != null);
+  return forward ? forward.result.actual_now_celsius : null;
+}
+
+function timeAgo(isoString) {
+  if (!isoString) return "";
+  const then = new Date(isoString).getTime();
+  const diffMs = Date.now() - then;
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
+
+async function fetchJSON(url, options) {
+  const resp = await fetch(url, options);
+  if (!resp.ok) {
+    const text = await resp.text().catch(() => "");
+    throw new Error(`${resp.status} ${resp.statusText}${text ? ` — ${text}` : ""}`);
+  }
+  return resp.json();
+}
+
+function latestDecisionPerSite(decisions) {
+  const map = new Map();
+  for (const d of decisions) {
+    if (!map.has(d.site_id)) map.set(d.site_id, d);
+  }
+  return map;
+}
+
+function renderHeroCard(decisions) {
+  const body = document.getElementById("hero-live-body");
+  body.innerHTML = "";
+  if (!decisions.length) {
+    body.innerHTML = '<p class="empty-state">No decisions logged yet. Click "Run a live check now" in the dashboard below to generate the first real one.</p>';
+    return;
+  }
+  const d = decisions[0];
+  body.appendChild(riskBadge(d.risk_level));
+  const site = document.createElement("p");
+  site.className = "hero-card-site";
+  site.textContent = d.site_name;
+  const role = document.createElement("p");
+  role.className = "hero-card-role";
+  role.textContent = `${d.worker_role} · ${timeAgo(d.logged_at)}`;
+  const action = document.createElement("p");
+  action.className = "hero-card-action";
+  action.textContent = d.recommended_action;
+  body.append(site, role, action);
+}
+
+function renderMoneyShot(decisions) {
+  const container = document.getElementById("money-shot-cards");
+  container.innerHTML = "";
+  const latest = latestDecisionPerSite(decisions);
+  if (latest.size === 0) {
+    container.innerHTML = '<p class="empty-state">No real decisions yet — run a live check below to populate this with genuine per-site data.</p>';
+    return;
+  }
+  for (const d of latest.values()) {
+    const card = document.createElement("div");
+    card.className = "money-card";
+    const temp = extractNowReading(d);
+    card.appendChild(riskBadge(d.risk_level));
+    const tempEl = document.createElement("p");
+    tempEl.className = "money-card-temp";
+    tempEl.textContent = temp != null ? `${temp.toFixed(1)}°C` : "—";
+    const siteEl = document.createElement("p");
+    siteEl.className = "money-card-site";
+    siteEl.textContent = d.site_name;
+    const roleEl = document.createElement("p");
+    roleEl.className = "money-card-role";
+    roleEl.textContent = d.worker_role;
+    const actionEl = document.createElement("p");
+    actionEl.className = "money-card-action";
+    actionEl.textContent = d.recommended_action;
+    card.append(tempEl, siteEl, roleEl, actionEl);
+    container.appendChild(card);
+  }
+}
+
+function renderSiteGrid(sites, decisions) {
+  const grid = document.getElementById("site-grid");
+  grid.innerHTML = "";
+  const latest = latestDecisionPerSite(decisions);
+  for (const site of sites) {
+    const card = document.createElement("article");
+    card.className = "site-card";
+    const head = document.createElement("div");
+    head.className = "site-card-head";
+    const h4 = document.createElement("h4");
+    h4.textContent = site.name;
+    head.appendChild(h4);
+    const decision = latest.get(site.id);
+    if (decision) head.appendChild(riskBadge(decision.risk_level));
+    const role = document.createElement("p");
+    role.className = "site-card-role";
+    role.textContent = `${site.worker_profile.role} · ${site.worker_profile.shift_hours}`;
+    card.append(head, role);
+
+    if (site.worker_profile.risk_flags && site.worker_profile.risk_flags.length) {
+      const flags = document.createElement("div");
+      flags.className = "site-card-flags";
+      for (const flag of site.worker_profile.risk_flags) {
+        const pill = document.createElement("span");
+        pill.className = "flag-pill";
+        pill.textContent = flag;
+        flags.appendChild(pill);
+      }
+      card.appendChild(flags);
+    }
+
+    const action = document.createElement("p");
+    if (decision) {
+      action.className = "site-card-action";
+      action.textContent = decision.recommended_action;
+    } else {
+      action.className = "site-card-empty";
+      action.textContent = "No decision logged yet for this site.";
+    }
+    card.appendChild(action);
+    grid.appendChild(card);
+  }
+}
+
+function renderFeed(decisions) {
+  const feed = document.getElementById("decision-feed");
+  feed.innerHTML = "";
+  if (!decisions.length) {
+    feed.innerHTML = '<p class="empty-state">No decisions logged yet.</p>';
+    return;
+  }
+  for (const d of decisions.slice(0, 20)) {
+    const item = document.createElement("article");
+    item.className = "feed-item";
+
+    const head = document.createElement("div");
+    head.className = "feed-item-head";
+    const left = document.createElement("div");
+    const siteSpan = document.createElement("span");
+    siteSpan.className = "feed-item-site";
+    siteSpan.textContent = `${d.site_name} — ${d.worker_role}`;
+    left.appendChild(siteSpan);
+    const time = document.createElement("span");
+    time.className = "feed-item-time";
+    time.textContent = timeAgo(d.logged_at);
+    head.append(left, riskBadge(d.risk_level), time);
+
+    const action = document.createElement("p");
+    action.className = "feed-item-action";
+    action.textContent = d.recommended_action;
+
+    const details = document.createElement("details");
+    const summary = document.createElement("summary");
+    summary.textContent = "Why — real inputs and rationale";
+    const rationale = document.createElement("p");
+    rationale.className = "rationale";
+    rationale.textContent = d.rationale;
+    details.append(summary, rationale);
+
+    item.append(head, action, details);
+    feed.appendChild(item);
+  }
+}
+
+async function loadAll() {
+  const statusEl = document.getElementById("run-status");
+  try {
+    const [sites, decisions] = await Promise.all([
+      fetchJSON("/api/sites"),
+      fetchJSON("/api/decisions?limit=50"),
+    ]);
+    renderHeroCard(decisions);
+    renderMoneyShot(decisions);
+    renderSiteGrid(sites, decisions);
+    renderFeed(decisions);
+  } catch (err) {
+    statusEl.hidden = false;
+    statusEl.className = "run-status is-error";
+    statusEl.textContent = `Couldn't load real data from the API: ${err.message}`;
+  }
+}
+
+function wireRunButton() {
+  const btn = document.getElementById("run-now-btn");
+  const statusEl = document.getElementById("run-status");
+  let timerHandle = null;
+
+  btn.addEventListener("click", async () => {
+    btn.disabled = true;
+    statusEl.hidden = false;
+    statusEl.className = "run-status";
+    const startedAt = Date.now();
+    const updateElapsed = () => {
+      const secs = Math.round((Date.now() - startedAt) / 1000);
+      statusEl.textContent = `Running a real autonomous cycle for every site (real FortyGuard + real LLM calls)… ${secs}s elapsed.`;
+    };
+    updateElapsed();
+    timerHandle = setInterval(updateElapsed, 1000);
+
+    try {
+      const data = await fetchJSON("/api/run", { method: "POST" });
+      clearInterval(timerHandle);
+      const failed = data.results.filter((r) => r.error);
+      if (failed.length) {
+        statusEl.className = "run-status is-error";
+        statusEl.textContent = `Completed with ${failed.length} error(s): ${failed.map((f) => `${f.site_name}: ${f.error}`).join("; ")}`;
+      } else {
+        statusEl.className = "run-status is-success";
+        statusEl.textContent = `Done — ${data.results.length} real decision(s) made just now. Refreshing the dashboard below.`;
+      }
+      await loadAll();
+    } catch (err) {
+      clearInterval(timerHandle);
+      statusEl.className = "run-status is-error";
+      statusEl.textContent = `The live run failed: ${err.message}`;
+    } finally {
+      btn.disabled = false;
+    }
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadAll();
+  wireRunButton();
+});
