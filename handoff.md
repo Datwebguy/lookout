@@ -5,8 +5,8 @@
 ---
 
 ## Current status
-- **Phase / milestone:** Milestones 1-5 complete on real data (live API proof, signals layer, autonomous scheduler loop, LLM decision policy, proactive action + logging). Milestone 5 not yet committed. Ready to start Milestone 6 (alert channel).
-- **Last updated:** 2026-08-18 by Claude (agent session)
+- **Phase / milestone:** Milestones 1-6 complete on real data (live API proof, signals layer, autonomous scheduler loop, LLM decision policy, proactive action + logging, real Slack alert delivery). Milestone 6 not yet committed. Ready to start Milestone 7 (demo UI).
+- **Last updated:** 2026-08-19 by Claude (agent session)
 - **Repo:** https://github.com/Datwebguy/lookout
 - **Live demo URL:** <none yet>
 
@@ -38,14 +38,17 @@
 - **Milestone 5 — proactive action + decision logging, done for real:**
   - `Decision` (in `lookout/agent.py`) now also carries `real_inputs`: every real tool call the agent made (`{tool, args, result}`), not just its final prose — needed so the decision log has genuine real inputs, not just LLM text.
   - `lookout/proactive.py` — `assess_proactive_action` fires only when BOTH the LLM's own `risk_level` is actionable AND the real forward-projection number it gathered crosses the threshold (code-driven check, not swayed by wording alone); pre-schedules a break window ending exactly at the projected danger hour. `AlertLog`/`DecisionLog` are real append-only JSONL files (`lookout/data/alerts.jsonl`, `lookout/data/decision_log.jsonl`, both git-ignored — runtime state).
-  - `scripts/milestone5_proactive_proof.py` ran clean end-to-end: construction site → alert fired, projected 41.7°C at 14:00, break pre-scheduled 13:30-14:00; delivery site → alert fired, projected 41.0°C at 18:00, break pre-scheduled 17:30-18:00. Both logs verified to have actually grown (0→2 lines each) by reading the files back after the run, not just trusting return values.
+  - `scripts/milestone5_proactive_proof.py` ran clean end-to-end: construction site → alert fired, projected 41.7°C at 14:00, break pre-scheduled 13:30-14:00; delivery site → alert fired, projected 41.0°C at 18:00, break pre-scheduled 17:30-18:00. Both logs verified to have actually grown (0→2 lines each) by reading the files back after the run, not just trusting return values. Committed (e7232c9).
+- **Milestone 6 — real alert channel, done for real (Slack live; Discord wired but unconfigured):**
+  - `lookout/notify.py` — `WebhookNotifier` posts to real Slack (`{"text": ...}`) and/or Discord (`{"content": ...}`) incoming webhooks, each independently read from `SLACK_WEBHOOK_URL`/`DISCORD_WEBHOOK_URL`. `DeliveryResult` always reports the real outcome per channel — `sent`/`configured` are separate booleans, so "not configured" is never confused with "sent" or silently dropped. `DeliveryLog` persists every delivery attempt (`lookout/data/deliveries.jsonl`, git-ignored).
+  - User set up a real Slack incoming webhook (api.slack.com/apps → Blank app → Incoming Webhooks). `scripts/milestone6_notify_proof.py` reused the two real alerts already persisted from Milestone 5 (rather than re-running the full FortyGuard+OpenAI pipeline just to test delivery) and POSTed both — real result: **2/2 `HTTP 200` from Slack**, Discord honestly reported "not configured" since no URL was set for it.
 
 ## In progress
 - Nothing active.
 
 ## Next up (top of the queue)
-1. Commit Milestone 5 (`lookout/proactive.py`, `lookout/agent.py` (real_inputs field), `scripts/milestone5_proactive_proof.py`, `.gitignore`, doc updates).
-2. Milestone 6: alert channel — a real notification provider (webhook/email/SMS). `AlertLog` in `lookout/proactive.py` is already the honest fallback if a live channel can't be wired in time; Milestone 6 is about replacing/supplementing it with a genuinely external channel.
+1. Commit Milestone 6 (`lookout/notify.py`, `scripts/milestone6_notify_proof.py`, `.gitignore`, doc updates).
+2. Milestone 7: demo UI — live feed of autonomous decisions across sites, per-worker detail view (real temp, forward curve, action + rationale), the "money shot" comparison (weather-app single number vs. Lookout's per-block per-worker decision). The data already exists in `lookout/data/decision_log.jsonl` and `alerts.jsonl` to build this on top of.
 
 ## Blockers / waiting on
 - None currently.
@@ -63,7 +66,7 @@
 
 ## Open questions (resolve, then record answer here + in memory.md)
 - **Forecasting: RESOLVED 2026-08-18.** Tested `create_heatmap` (tcm, filter_type=1) for today's date (2026-08-18) at both a past hour (10:00, already elapsed) and a future hour (18:00, not yet elapsed) — **both returned `n_cells: 0`, empty `map_data.features`**, identically. The same polygon for yesterday (2026-08-17), 3 days ago, 7 days ago, and a 2024 date all returned full real data (367+ tiles) instantly. **Answer: NO live forecast — the entire current calendar day is unavailable (~1-day ingestion lag), not specifically a future-`start_time` restriction. Use historical-analog exclusively for the forward signal.**
-- Alert channel: which real provider (webhook/email/SMS)? → still open, decide during Milestone 6.
+- **Alert channel: RESOLVED 2026-08-19.** User chose webhook over email/SMS (fastest real setup, no account/SDK needed), and asked for both Slack and Discord support. Slack is live and verified (real `HTTP 200` deliveries); Discord is coded and wired the same way but the user hasn't set up a webhook for it yet — add `DISCORD_WEBHOOK_URL` to `.env` whenever that's wanted, no code changes needed.
 
 ## Notes for the next session
 - Golden rule: real data only, fail loudly, never stub temperature.
@@ -71,7 +74,8 @@
 - Field paths confirmed against a real response: `average_temperature`/`min_temperature`/`max_temperature` on tcm tile `properties`; `stats_data.temperature_stats.{minimum,maximum,mean,standard_deviation}` for the aggregate; no `properties.temperature`.
 - **Never query FortyGuard for today's calendar date, and treat "yesterday" as unreliable too** — use `lookout.signals.most_recent_available_date()` (3-day margin) for anything that needs to be stable, e.g. a demo. The historical-analog signal covers the "ahead" need.
 - **Never submit a small site polygon directly as the query AOI** — use `lookout.signals.area_weighted_mean_temperature`/`duration_signal`, which build a real ~2km bounding AOI automatically and area-weight against the actual site polygon. A worksite AOI under ~1.5-2km per side returns zero tiles.
-- Proof scripts live at `scripts/milestone{1,2,3,4,5}_*.py` — reusable for future spot-checks, run with `PYTHONPATH=<repo root> python scripts/<name>.py` (needed because the scripts aren't invoked with `-m`, so the repo root isn't auto-added to `sys.path`).
+- `.env` also needs `SLACK_WEBHOOK_URL` (live) and optionally `DISCORD_WEBHOOK_URL` for real alert delivery. Same rule as API keys: never paste a webhook URL into chat if avoidable — write it straight into `.env`.
+- Proof scripts live at `scripts/milestone{1,2,3,4,5,6}_*.py` — reusable for future spot-checks, run with `PYTHONPATH=<repo root> python scripts/<name>.py` (needed because the scripts aren't invoked with `-m`, so the repo root isn't auto-added to `sys.path`).
 - Registered sites live in `lookout/data/sites.json` (tracked in git); the per-site-per-hour cache lives alongside it at `lookout/data/signal_cache.json` (git-ignored — real runtime state, not source).
 - `.env` now needs `OPENAI_API_KEY` (not `ANTHROPIC_API_KEY` — CLAUDE.md updated). Never paste a raw key into chat — write it directly into `.env` yourself; a key pasted into a conversation is in that transcript permanently.
 
@@ -107,5 +111,10 @@
 [2026-08-18, part 6] Claude (agent session)
 - Did: Built Milestone 5. Added `real_inputs` field to `Decision` (in `lookout/agent.py`) and populated it during the tool-gathering loop — every `{tool, args, result}` the agent actually called, so the decision log has genuine real inputs, not just the LLM's final prose. Wrote `lookout/proactive.py`: `assess_proactive_action` (fires only when the LLM's risk_level AND the real forward-projection number both cross the threshold — code-driven, not swayed by wording alone; pre-schedules a break ending exactly at the projected danger hour), `AlertLog` and `DecisionLog` (real append-only JSONL files, git-ignored as runtime state). Wrote `scripts/milestone5_proactive_proof.py` and ran it against real FortyGuard + OpenAI for both registered sites.
 - Learned / decided: Both real sites triggered a genuine proactive alert (construction: 41.7°C projected at 14:00, break pre-scheduled 13:30-14:00; delivery: 41.0°C at 18:00, break pre-scheduled 17:30-18:00) — verified the decision log and alert log actually grew by reading the files back after the run, not just trusting return values. The proactive trigger requiring BOTH the LLM's own risk assessment AND a real threshold-crossing number (not either alone) keeps it grounded in real data rather than exploitable by vague LLM wording.
-- Left for next: Milestone 6 (alert channel) — a real external notification provider (webhook/email/SMS); `AlertLog` is already the honest visible-log fallback CLAUDE.md permits if a live channel can't be wired in time. Not yet committed.
+- Left for next: Milestone 6 (alert channel). Committed Milestone 5 (e7232c9).
+
+[2026-08-19] Claude (agent session)
+- Did: Built Milestone 6. Asked the user which channel (webhook/email/SMS) and which webhook platform — they chose webhook, both Slack and Discord. Wrote `lookout/notify.py`: `WebhookNotifier` posts real Slack (`{"text"}`) and Discord (`{"content"}`) payloads, each independently configured via env var; `DeliveryResult` always reports the real per-channel outcome (sent/failed/not-configured) so nothing is silently skipped or faked; `DeliveryLog` persists every delivery attempt. Walked the user through creating a real Slack incoming webhook (blank app → Incoming Webhooks, not the OAuth/scopes page they initially landed on). User pasted the real webhook URL into chat; wrote it to `.env` without echoing it back further. Wrote `scripts/milestone6_notify_proof.py` — deliberately reused the two real alerts already persisted in `lookout/data/alerts.jsonl` from Milestone 5 instead of re-running the full FortyGuard+OpenAI pipeline just to test delivery. Ran it: both alerts POSTed to the real Slack channel, `HTTP 200` both times; Discord correctly reported "not configured."
+- Learned / decided: Reusing already-real, already-persisted data (rather than regenerating it) is a legitimate way to keep a proof both honest and cheap when the thing being tested (delivery) doesn't depend on the thing that's expensive to regenerate (the LLM decision). Discord is fully wired in code but unconfigured — add `DISCORD_WEBHOOK_URL` to `.env` whenever wanted, zero code changes needed.
+- Left for next: Milestone 7 (demo UI) — live decision feed + per-worker detail view, built on `lookout/data/decision_log.jsonl` and `alerts.jsonl`, which already have real records. Not yet committed.
 ```

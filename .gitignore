@@ -253,3 +253,4 @@ data/env_params/*
 lookout/data/signal_cache.json
 lookout/data/decision_log.jsonl
 lookout/data/alerts.jsonl
+lookout/data/deliveries.jsonl

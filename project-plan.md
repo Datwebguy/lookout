@@ -36,8 +36,8 @@
 - [x] Detect an upcoming danger window (from historical-analog) and pre-schedule a break + emit an alert *now*. `lookout/proactive.py` — `assess_proactive_action` fires only when both the LLM's own risk_level AND the real forward-projection number cross the threshold (code-driven, not just LLM wording). Real result: construction site → alert fired, projected 41.7°C at 14:00, break pre-scheduled 13:30-14:00; delivery site → alert fired, projected 41.0°C at 18:00, break pre-scheduled 17:30-18:00 — both breaks scheduled to end exactly at the danger hour, genuinely proactive.
 - [x] Log every autonomous decision with its real inputs. `DecisionLog`/`AlertLog` in `lookout/proactive.py`, JSONL append-only. Verified live: both logs grew from 0 to 2 real entries in one run, confirmed by reading the files back.
 
-## Milestone 6 — Alert channel
-- [ ] Real notification out (webhook/email/SMS via a real provider). If not wired in time, a real visible alert log — never a faked "sent".
+## Milestone 6 — Alert channel — ✅ DONE 2026-08-19
+- [x] Real notification out (webhook/email/SMS via a real provider). `lookout/notify.py` — real Slack + Discord incoming-webhook delivery, each independently configured via env var, delivery status always honestly reported (sent/failed/not-configured) via `DeliveryResult`, never faked. Real result: 2 real alerts POSTed to a real Slack channel, both `HTTP 200`; Discord correctly reported "not configured" since no `DISCORD_WEBHOOK_URL` was set — the fallback `AlertLog` (Milestone 5) remains the always-on visible log regardless of webhook status.
 
 ## Milestone 7 — Demo UI
 - [ ] Live feed of autonomous decisions across sites.
