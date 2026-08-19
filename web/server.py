@@ -148,3 +148,8 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 @app.get("/")
 def index() -> FileResponse:
     return FileResponse(str(STATIC_DIR / "index.html"))
+
+
+@app.get("/app")
+def dashboard() -> FileResponse:
+    return FileResponse(str(STATIC_DIR / "app.html"))

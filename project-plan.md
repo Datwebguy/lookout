@@ -39,12 +39,16 @@
 ## Milestone 6 — Alert channel — ✅ DONE 2026-08-19
 - [x] Real notification out (webhook/email/SMS via a real provider). `lookout/notify.py` — real Slack + Discord incoming-webhook delivery, each independently configured via env var, delivery status always honestly reported (sent/failed/not-configured) via `DeliveryResult`, never faked. Real result: 2 real alerts POSTed to a real Slack channel, both `HTTP 200`; Discord correctly reported "not configured" since no `DISCORD_WEBHOOK_URL` was set — the fallback `AlertLog` (Milestone 5) remains the always-on visible log regardless of webhook status.
 
-## Milestone 7 — Demo UI — ✅ DONE 2026-08-19
+## Milestone 7 — Demo UI — ✅ DONE 2026-08-19 (revised same day per user feedback)
 - [x] Live feed of autonomous decisions across sites. `web/server.py` (FastAPI) + `web/static/` — `/api/decisions` reads the real `decision_log.jsonl`, rendered as an expandable feed (real rationale on demand).
 - [x] Per-worker view: real temp, forward curve, action + rationale. Site cards on the dashboard show each registered worker's real risk badge, action, and profile; feed items expand to the real signal-driven rationale.
-- [x] Build the "money shot": weather-app single number vs. Lookout's per-block, per-worker autonomous decision. Landing page "The problem" section — a flat single-number weather card next to real, distinct per-site Lookout decision cards, populated live from `/api/decisions`.
-- [x] Landing page (orange palette, hero + product story) built on top of the same page, flowing into the live dashboard via one CTA. Verified in a real headless-Chromium render at desktop/tablet/mobile: no console errors, no horizontal overflow at any width, all key text pairs pass WCAG AA/AAA contrast, visible keyboard focus outlines confirmed by tabbing.
-- [x] "Run a live check now" button triggers a genuine autonomous cycle (`POST /api/run` → real FortyGuard + real OpenAI calls) on demand — never mocked, honest ~1-2min/site latency shown in the UI.
+- [x] Build the "money shot": weather-app single number vs. Lookout's per-block, per-worker autonomous decision. Now lives on `/app` (the dashboard) rather than the landing page — real, distinct per-site Lookout decision cards next to a flat single-number weather card, populated live from `/api/decisions`.
+- [x] Landing page (`/`) and live dashboard (`/app`) are two separate pages, not one combined page. Reversed the original single-page recommendation after the user's direct feedback that mixing marketing copy with a live operational widget looked unprofessional — landing is now pure pitch (hero + 3-step explainer + one CTA), the dashboard is pure product with no marketing copy.
+- [x] Palette changed from orange to blue per explicit user request, after the initial orange build was reviewed.
+- [x] Copy cut hard per user feedback ("too many texts") — hero subhead to one sentence, "how it works" from 5 detailed steps to 3 short ones, dashboard explanatory paragraphs removed in favor of short functional labels.
+- [x] Every hyphen and dash removed from all page copy per explicit user request (real LLM decision text in the feed is left untouched — that's real data, not copy).
+- [x] Fixed a real UX issue the user found by using the app themselves: the site cards / feed didn't visibly change while "Run a live check" was in progress, so it looked stuck even though a real ~2 minute cycle was genuinely running. Added a dimmed "updating" state plus a spinner and clearer status copy.
+- [x] Verified in real headless-Chromium renders at desktop/tablet/mobile on both pages: no console errors, no horizontal overflow at any width, visible keyboard focus outlines, WCAG contrast checked programmatically (worst real case 6.41:1 against the button gradient's lightest point).
 
 ## Milestone 8 — Harden + rehearse
 - [ ] Real end-to-end runs on Phoenix coordinates, repeatedly.

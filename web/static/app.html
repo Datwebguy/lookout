@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lookout Dashboard</title>
+<meta name="description" content="Live autonomous heat safety decisions from Lookout, built on real FortyGuard data." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/styles.css" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%8D%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header app-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">
+      <span class="brand-mark" aria-hidden="true"></span>
+      Lookout
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      <a href="/">Home</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="app-main">
+  <div class="wrap">
+    <div class="app-head">
+      <h1>Live dashboard</h1>
+      <button class="btn btn-primary" id="run-now-btn" type="button">Run a live check</button>
+    </div>
+
+    <div class="run-status" id="run-status" hidden role="status" aria-live="polite"></div>
+
+    <section class="panel" id="problem">
+      <h2>One number versus a real decision</h2>
+      <p class="panel-sub">A typical weather app, next to what Lookout actually sees.</p>
+      <div class="comparison">
+        <div class="compare-card compare-weather">
+          <p class="compare-label">Typical weather app</p>
+          <p class="compare-number">38°C</p>
+          <p class="compare-place">Phoenix, AZ</p>
+          <p class="compare-note">One number for the whole city.</p>
+        </div>
+        <div class="compare-arrow" aria-hidden="true">→</div>
+        <div class="compare-card compare-lookout" id="money-shot-cards">
+          <p class="live-loading">Loading real decisions.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="sites">
+      <h2>Registered sites</h2>
+      <p class="panel-sub">Each worker gets a decision built for them.</p>
+      <div class="site-grid" id="site-grid">
+        <p class="live-loading">Loading sites.</p>
+      </div>
+    </section>
+
+    <section class="panel" id="feed">
+      <h2>Decision log</h2>
+      <p class="panel-sub">Every autonomous decision, with the real inputs behind it.</p>
+      <div class="feed" id="decision-feed">
+        <p class="live-loading">Loading decision history.</p>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>Lookout. Built on FortyGuard.</span>
+    <span>Real data only.</span>
+  </div>
+</footer>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>

@@ -3,163 +3,103 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lookout — Autonomous Heat-Safety Agent</title>
-<meta name="description" content="Lookout watches every outdoor worksite in real time with hyperlocal FortyGuard temperature data and autonomously schedules breaks before the heat becomes dangerous." />
+<title>Lookout</title>
+<meta name="description" content="Lookout watches every outdoor worksite in real time and schedules the break before the heat becomes dangerous." />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/css/styles.css" />
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%A5%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%8D%3C/text%3E%3C/svg%3E">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 
 <header class="site-header">
   <div class="wrap header-inner">
-    <a class="brand" href="#top">
+    <a class="brand" href="/">
       <span class="brand-mark" aria-hidden="true"></span>
       Lookout
     </a>
     <nav class="site-nav" aria-label="Primary">
-      <a href="#how-it-works">How it works</a>
-      <a href="#dashboard">Live dashboard</a>
-      <a href="#dashboard" class="btn btn-primary btn-small">See it live</a>
+      <a href="/app" class="btn btn-primary btn-small">Open the dashboard</a>
     </nav>
   </div>
 </header>
 
 <main id="main">
 
-  <section class="hero" id="top">
+  <section class="hero">
     <div class="hero-glow" aria-hidden="true"></div>
     <div class="wrap hero-inner">
-      <div class="hero-copy">
-        <p class="eyebrow">Autonomous heat-safety agent</p>
-        <h1>Lookout calls the break before the heat does.</h1>
-        <p class="hero-sub">
-          Heat is hyperlocal — one block can run several degrees hotter than the forecast.
-          Lookout watches every worksite with real temperature data, reasons about the
-          specific person working there, and schedules the break before anyone's actually
-          at risk. Nobody has to ask.
-        </p>
-        <div class="hero-actions">
-          <a href="#dashboard" class="btn btn-primary">See it decide, live</a>
-          <a href="#how-it-works" class="btn btn-ghost">How it works</a>
-        </div>
-        <p class="hero-meta">Real FortyGuard hyperlocal data · Real LLM reasoning · Track 06 — Agentic AI</p>
-      </div>
-
       <div class="hero-visual">
         <div class="heat-motif" aria-hidden="true">
-          <svg viewBox="0 0 400 400" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+          <svg viewBox="0 0 400 260" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
             <defs>
-              <radialGradient id="heatGlow" cx="50%" cy="35%" r="60%">
-                <stop offset="0%" stop-color="#ff9142" stop-opacity="0.55"/>
-                <stop offset="100%" stop-color="#ff9142" stop-opacity="0"/>
+              <radialGradient id="heatGlow" cx="50%" cy="30%" r="65%">
+                <stop offset="0%" stop-color="#5b93ff" stop-opacity="0.5"/>
+                <stop offset="100%" stop-color="#5b93ff" stop-opacity="0"/>
               </radialGradient>
               <linearGradient id="waveGrad" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stop-color="#ffb168" stop-opacity="0.05"/>
-                <stop offset="50%" stop-color="#ff7a1f" stop-opacity="0.45"/>
-                <stop offset="100%" stop-color="#ffb168" stop-opacity="0.05"/>
+                <stop offset="0%" stop-color="#8fb8ff" stop-opacity="0.05"/>
+                <stop offset="50%" stop-color="#2f6fed" stop-opacity="0.5"/>
+                <stop offset="100%" stop-color="#8fb8ff" stop-opacity="0.05"/>
               </linearGradient>
             </defs>
-            <circle cx="200" cy="140" r="180" fill="url(#heatGlow)" />
+            <circle cx="200" cy="105" r="112" fill="url(#heatGlow)" />
             <g stroke="url(#waveGrad)" stroke-width="2" fill="none" opacity="0.9">
-              <path d="M20,260 C90,230 130,290 200,260 C270,230 310,290 380,260" />
-              <path d="M20,300 C90,270 130,330 200,300 C270,270 310,330 380,300" />
-              <path d="M20,340 C90,310 130,370 200,340 C270,310 310,370 380,340" />
+              <path d="M20,170 C90,140 130,200 200,170 C270,140 310,200 380,170" />
+              <path d="M20,205 C90,175 130,235 200,205 C270,175 310,235 380,205" />
+              <path d="M20,240 C90,210 130,270 200,240 C270,210 310,270 380,240" />
             </g>
           </svg>
         </div>
-        <div class="live-card" id="hero-live-card">
-          <div class="live-card-head">
-            <span class="live-dot" aria-hidden="true"></span>
-            <span>Live from Lookout</span>
-          </div>
-          <div class="live-card-body" id="hero-live-body">
-            <p class="live-loading">Loading the latest real decision…</p>
-          </div>
+      </div>
+      <div class="hero-copy">
+        <p class="eyebrow">Autonomous heat safety agent</p>
+        <h1>Lookout calls the break before the heat does.</h1>
+        <p class="hero-sub">
+          Lookout watches every worksite in real time and schedules the break before
+          anyone is actually at risk. Nobody has to ask.
+        </p>
+        <div class="hero-actions">
+          <a href="/app" class="btn btn-primary">Open the dashboard</a>
         </div>
+        <p class="hero-meta">Real temperature data. Real reasoning. Track 06, Agentic AI.</p>
       </div>
     </div>
   </section>
 
-  <section class="section problem" id="problem">
+  <section class="section how">
     <div class="wrap">
-      <p class="eyebrow">The problem</p>
-      <h2>A weather app gives you one number. Lookout gives every worker a decision.</h2>
-      <div class="comparison">
-        <div class="compare-card compare-weather">
-          <p class="compare-label">Typical weather app</p>
-          <p class="compare-number">38°C</p>
-          <p class="compare-place">Phoenix, AZ</p>
-          <p class="compare-note">Same number, whole city, whoever asks — and only if they think to check.</p>
-        </div>
-        <div class="compare-arrow" aria-hidden="true">→</div>
-        <div class="compare-card compare-lookout" id="money-shot-cards">
-          <p class="live-loading">Loading real per-site decisions…</p>
-        </div>
+      <div class="section-head">
+        <p class="eyebrow">How it works</p>
+        <h2>Three real signals. One decision.</h2>
       </div>
-    </div>
-  </section>
-
-  <section class="section how" id="how-it-works">
-    <div class="wrap">
-      <p class="eyebrow">How it works</p>
-      <h2>Five real signals. One autonomous decision.</h2>
       <ol class="steps">
         <li>
           <span class="step-num" aria-hidden="true">1</span>
-          <h3>Now</h3>
-          <p>Real hyperlocal temperature at this exact worksite — area-weighted across every FortyGuard tile the site touches, not a nearest-tile guess.</p>
+          <h3>Now and ahead</h3>
+          <p>The real temperature at this exact worksite, plus what is likely coming next.</p>
         </li>
         <li>
           <span class="step-num" aria-hidden="true">2</span>
-          <h3>Ahead</h3>
-          <p>FortyGuard has no live forecast — we verified that empirically — so Lookout projects the next few hours from real climatology plus today's real anomaly.</p>
+          <h3>How long</h3>
+          <p>How many hours this site has spent past a danger threshold, not just how hot it is right now.</p>
         </li>
         <li>
           <span class="step-num" aria-hidden="true">3</span>
-          <h3>Baseline</h3>
-          <p>What's actually normal for this site, this hour, computed from real multi-year history — not a citywide average.</p>
-        </li>
-        <li>
-          <span class="step-num" aria-hidden="true">4</span>
-          <h3>Duration</h3>
-          <p>How many hours this site has run past a danger threshold. At site scale, peak temperature is nearly flat — duration is what actually separates a dangerous day.</p>
-        </li>
-        <li>
-          <span class="step-num" aria-hidden="true">5</span>
-          <h3>The worker</h3>
-          <p>Role, shift hours, and risk flags — so identical weather can produce a different decision for a different person.</p>
+          <h3>This worker</h3>
+          <p>Role, shift, and health flags, so the same weather can mean a different decision.</p>
         </li>
       </ol>
     </div>
   </section>
 
-  <section class="section dashboard" id="dashboard">
+  <section class="section closing">
     <div class="wrap">
-      <div class="dashboard-head">
-        <div>
-          <p class="eyebrow">Live dashboard</p>
-          <h2>Every autonomous decision, with the real inputs behind it.</h2>
-        </div>
-        <button class="btn btn-primary" id="run-now-btn" type="button">Run a live check now</button>
-      </div>
-      <p class="dashboard-note">
-        This calls the real FortyGuard API and a real LLM for every registered site — typically
-        1–2 minutes per site. Nothing on this page is mocked or pre-scripted.
-      </p>
-      <div class="run-status" id="run-status" hidden role="status" aria-live="polite"></div>
-
-      <div class="site-grid" id="site-grid">
-        <p class="live-loading">Loading registered sites…</p>
-      </div>
-
-      <h3 class="feed-heading">Decision log</h3>
-      <div class="feed" id="decision-feed">
-        <p class="live-loading">Loading real decision history…</p>
-      </div>
+      <h2>See it decide, live.</h2>
+      <p class="hero-sub" style="margin-left:auto;margin-right:auto;">Every number on the dashboard is a real call, made right now.</p>
+      <a href="/app" class="btn btn-primary">Open the dashboard</a>
     </div>
   </section>
 
@@ -167,11 +107,9 @@
 
 <footer class="site-footer">
   <div class="wrap footer-inner">
-    <span>Lookout — built on FortyGuard's hyperlocal temperature API. Track 06, Agentic AI.</span>
-    <span>Real data only. No mocked temperatures, ever.</span>
+    <span>Lookout. Built on FortyGuard.</span>
+    <span>Real data only.</span>
   </div>
 </footer>
-
-<script src="/static/js/app.js"></script>
 </body>
 </html>

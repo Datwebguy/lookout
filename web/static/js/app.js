@@ -1,6 +1,6 @@
-// Lookout dashboard — fetches only real data from the backend. No mocked values here:
-// every number rendered on this page came from a real FortyGuard/OpenAI call logged by
-// the Python agent.
+// Lookout dashboard. Fetches only real data from the backend. Nothing here is mocked:
+// every number rendered on this page came from a real FortyGuard or OpenAI call logged
+// by the Python agent.
 
 const RISK_CLASS = {
   low: "risk-low",
@@ -41,7 +41,7 @@ async function fetchJSON(url, options) {
   const resp = await fetch(url, options);
   if (!resp.ok) {
     const text = await resp.text().catch(() => "");
-    throw new Error(`${resp.status} ${resp.statusText}${text ? ` — ${text}` : ""}`);
+    throw new Error(`${resp.status} ${resp.statusText}${text ? `: ${text}` : ""}`);
   }
   return resp.json();
 }
@@ -54,33 +54,12 @@ function latestDecisionPerSite(decisions) {
   return map;
 }
 
-function renderHeroCard(decisions) {
-  const body = document.getElementById("hero-live-body");
-  body.innerHTML = "";
-  if (!decisions.length) {
-    body.innerHTML = '<p class="empty-state">No decisions logged yet. Click "Run a live check now" in the dashboard below to generate the first real one.</p>';
-    return;
-  }
-  const d = decisions[0];
-  body.appendChild(riskBadge(d.risk_level));
-  const site = document.createElement("p");
-  site.className = "hero-card-site";
-  site.textContent = d.site_name;
-  const role = document.createElement("p");
-  role.className = "hero-card-role";
-  role.textContent = `${d.worker_role} · ${timeAgo(d.logged_at)}`;
-  const action = document.createElement("p");
-  action.className = "hero-card-action";
-  action.textContent = d.recommended_action;
-  body.append(site, role, action);
-}
-
 function renderMoneyShot(decisions) {
   const container = document.getElementById("money-shot-cards");
   container.innerHTML = "";
   const latest = latestDecisionPerSite(decisions);
   if (latest.size === 0) {
-    container.innerHTML = '<p class="empty-state">No real decisions yet — run a live check below to populate this with genuine per-site data.</p>';
+    container.innerHTML = '<p class="empty-state">No decisions yet. Run a live check to see real per site results.</p>';
     return;
   }
   for (const d of latest.values()) {
@@ -90,7 +69,7 @@ function renderMoneyShot(decisions) {
     card.appendChild(riskBadge(d.risk_level));
     const tempEl = document.createElement("p");
     tempEl.className = "money-card-temp";
-    tempEl.textContent = temp != null ? `${temp.toFixed(1)}°C` : "—";
+    tempEl.textContent = temp != null ? `${temp.toFixed(1)}°C` : "No reading";
     const siteEl = document.createElement("p");
     siteEl.className = "money-card-site";
     siteEl.textContent = d.site_name;
@@ -142,7 +121,7 @@ function renderSiteGrid(sites, decisions) {
       action.textContent = decision.recommended_action;
     } else {
       action.className = "site-card-empty";
-      action.textContent = "No decision logged yet for this site.";
+      action.textContent = "No decision yet for this site.";
     }
     card.appendChild(action);
     grid.appendChild(card);
@@ -153,7 +132,7 @@ function renderFeed(decisions) {
   const feed = document.getElementById("decision-feed");
   feed.innerHTML = "";
   if (!decisions.length) {
-    feed.innerHTML = '<p class="empty-state">No decisions logged yet.</p>';
+    feed.innerHTML = '<p class="empty-state">No decisions yet.</p>';
     return;
   }
   for (const d of decisions.slice(0, 20)) {
@@ -165,7 +144,7 @@ function renderFeed(decisions) {
     const left = document.createElement("div");
     const siteSpan = document.createElement("span");
     siteSpan.className = "feed-item-site";
-    siteSpan.textContent = `${d.site_name} — ${d.worker_role}`;
+    siteSpan.textContent = `${d.site_name}, ${d.worker_role}`;
     left.appendChild(siteSpan);
     const time = document.createElement("span");
     time.className = "feed-item-time";
@@ -178,7 +157,7 @@ function renderFeed(decisions) {
 
     const details = document.createElement("details");
     const summary = document.createElement("summary");
-    summary.textContent = "Why — real inputs and rationale";
+    summary.textContent = "Why: real inputs and rationale";
     const rationale = document.createElement("p");
     rationale.className = "rationale";
     rationale.textContent = d.rationale;
@@ -189,6 +168,12 @@ function renderFeed(decisions) {
   }
 }
 
+function setUpdating(isUpdating) {
+  for (const id of ["money-shot-cards", "site-grid", "decision-feed"]) {
+    document.getElementById(id).classList.toggle("is-updating", isUpdating);
+  }
+}
+
 async function loadAll() {
   const statusEl = document.getElementById("run-status");
   try {
@@ -196,14 +181,13 @@ async function loadAll() {
       fetchJSON("/api/sites"),
       fetchJSON("/api/decisions?limit=50"),
     ]);
-    renderHeroCard(decisions);
     renderMoneyShot(decisions);
     renderSiteGrid(sites, decisions);
     renderFeed(decisions);
   } catch (err) {
     statusEl.hidden = false;
     statusEl.className = "run-status is-error";
-    statusEl.textContent = `Couldn't load real data from the API: ${err.message}`;
+    statusEl.textContent = `Could not load data: ${err.message}`;
   }
 }
 
@@ -214,12 +198,19 @@ function wireRunButton() {
 
   btn.addEventListener("click", async () => {
     btn.disabled = true;
+    setUpdating(true);
     statusEl.hidden = false;
     statusEl.className = "run-status";
     const startedAt = Date.now();
     const updateElapsed = () => {
       const secs = Math.round((Date.now() - startedAt) / 1000);
-      statusEl.textContent = `Running a real autonomous cycle for every site (real FortyGuard + real LLM calls)… ${secs}s elapsed.`;
+      statusEl.innerHTML = "";
+      const spinner = document.createElement("span");
+      spinner.className = "spinner";
+      spinner.setAttribute("aria-hidden", "true");
+      const text = document.createElement("span");
+      text.textContent = `Checking every site right now. This can take a minute or two. ${secs}s elapsed.`;
+      statusEl.append(spinner, text);
     };
     updateElapsed();
     timerHandle = setInterval(updateElapsed, 1000);
@@ -230,17 +221,18 @@ function wireRunButton() {
       const failed = data.results.filter((r) => r.error);
       if (failed.length) {
         statusEl.className = "run-status is-error";
-        statusEl.textContent = `Completed with ${failed.length} error(s): ${failed.map((f) => `${f.site_name}: ${f.error}`).join("; ")}`;
+        statusEl.textContent = `Finished with ${failed.length} error(s). ${failed.map((f) => `${f.site_name}: ${f.error}`).join(" ")}`;
       } else {
         statusEl.className = "run-status is-success";
-        statusEl.textContent = `Done — ${data.results.length} real decision(s) made just now. Refreshing the dashboard below.`;
+        statusEl.textContent = `Done. ${data.results.length} new real decision(s) below.`;
       }
       await loadAll();
     } catch (err) {
       clearInterval(timerHandle);
       statusEl.className = "run-status is-error";
-      statusEl.textContent = `The live run failed: ${err.message}`;
+      statusEl.textContent = `The live check failed: ${err.message}`;
     } finally {
+      setUpdating(false);
       btn.disabled = false;
     }
   });
