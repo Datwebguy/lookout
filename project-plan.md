@@ -61,7 +61,7 @@
 - [ ] Record a backup video of a real run. Rehearse < 3 min narration.
 
 ## Submission checklist (30 Aug)
-- [ ] Live demo URL (no login, stays up through judging).
+- [x] Live demo URL (no login, stays up through judging). **https://lookoutapp.fly.dev/** — deployed to Fly.io (`fullbuild` org), real background autonomy loop running in production, verified via two independent real decisions produced with zero requests in between.
 - [ ] Video (YouTube/Loom, ≤ 3 min).
 - [ ] Code repo (if private, add **Hackathon-FG** as collaborator).
 - [ ] Submission form: team name, members/emails, primary track = Agentic (06), secondary tags = Cities (01) + Government (04); disclose AI tools + external datasets used.

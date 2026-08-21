@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.git/
+.env
+.venv/
+notebooks/
+docs/
+assets/
+/data/
+outputs/
+lookout/data/signal_cache.json
+lookout/data/decision_log.jsonl
+lookout/data/alerts.jsonl
+lookout/data/deliveries.jsonl
+*.md
