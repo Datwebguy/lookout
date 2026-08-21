@@ -2,14 +2,22 @@
 
 Serves the landing page + live dashboard and a thin real-data API on top of the existing
 lookout package. Never fabricates a response: /api/decisions and /api/alerts read the real
-JSONL logs Milestones 4-6 already produce, and /api/run triggers a genuine autonomous cycle
-(real FortyGuard + real OpenAI calls) rather than returning canned data.
+JSONL logs Milestones 4-6 already produce.
+
+Autonomy: a real background thread (started at process startup, see `_background_loop`)
+calls every registered site on its own, on a real interval — no human has to visit the
+page or click anything for a decision to get made. `POST /api/run` triggers the same real
+cycle on demand, for a demo that does not want to wait out a full interval; it is a
+convenience, not the only path to a decision.
 """
 
 from __future__ import annotations
 
 import json
 import re
+import threading
+import time
+import traceback
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -23,7 +31,7 @@ from fastapi.staticfiles import StaticFiles  # noqa: E402
 from fortyguard import FortyGuardClient  # noqa: E402
 from fortyguard.exceptions import FortyGuardError  # noqa: E402
 from openai import OpenAI  # noqa: E402
-from pydantic import BaseModel, Field  # noqa: E402
+from pydantic import BaseModel, Field, model_validator  # noqa: E402
 
 from lookout.notify import DeliveryLog, WebhookNotifier  # noqa: E402
 from lookout.proactive import AlertLog, DecisionLog, decide_and_act  # noqa: E402
@@ -39,6 +47,7 @@ STATIC_DIR = Path(__file__).resolve().parent / "static"
 
 BASELINE_YEARS = [2024, 2025]
 THRESHOLD_CELSIUS = 35.0
+AUTONOMOUS_INTERVAL_SECONDS = 3600  # real hourly cadence, matches FortyGuard's hourly data
 
 app = FastAPI(title="Lookout")
 app.add_middleware(
@@ -97,6 +106,20 @@ class SiteIn(BaseModel):
     slack_webhook_url: str | None = None
     discord_webhook_url: str | None = None
 
+    @model_validator(mode="after")
+    def _require_a_real_webhook(self) -> "SiteIn":
+        # There is no login on this dashboard, so the server-wide default webhook is
+        # effectively shared by anyone who registers a site without their own. Requiring
+        # a real webhook here is what stops one registrant's alerts from silently landing
+        # in another registrant's channel.
+        if not (self.slack_webhook_url or self.discord_webhook_url):
+            raise ValueError(
+                "A Slack or Discord webhook is required. Without one, your alerts would "
+                "go to the shared default channel, where other registered sites' alerts "
+                "also go."
+            )
+        return self
+
 
 def _slugify(name: str) -> str:
     slug = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
@@ -141,19 +164,12 @@ def get_alerts(limit: int = 50) -> list[dict]:
     return _read_jsonl(ALERT_LOG_PATH, limit)
 
 
-@app.post("/api/run")
-def run_now() -> dict:
-    """Trigger one real autonomous cycle for every registered site, right now.
-
-    Real FortyGuard + real OpenAI calls per site (roughly a minute or two each) — no
-    mocked or cached-looking response. Failures are surfaced, not swallowed.
+def _run_all_sites(fg_client: FortyGuardClient, openai_client: OpenAI) -> list[dict]:
+    """One real autonomous cycle over every registered site. Shared by the always-on
+    background loop and the on-demand /api/run endpoint — the same real code path either
+    way, so "run it now" is never a different, lighter-weight thing than what the
+    background loop actually does.
     """
-    try:
-        fg_client = FortyGuardClient()
-    except FortyGuardError as exc:
-        raise HTTPException(status_code=500, detail=f"FortyGuard client error: {exc}") from exc
-
-    openai_client = OpenAI()
     sites = load_sites(SITES_PATH)
     decision_log = DecisionLog(DECISION_LOG_PATH)
     alert_log = AlertLog(ALERT_LOG_PATH)
@@ -166,7 +182,7 @@ def run_now() -> dict:
                 openai_client, fg_client, site, decision_log, alert_log,
                 threshold_celsius=THRESHOLD_CELSIUS, baseline_years=BASELINE_YEARS,
             )
-        except Exception as exc:  # noqa: BLE001 - surface any real failure to the caller
+        except Exception as exc:  # noqa: BLE001 - surface any real failure, never swallow it
             results.append({"site_id": site.id, "site_name": site.name, "error": str(exc)})
             continue
 
@@ -197,7 +213,45 @@ def run_now() -> dict:
             "delivery": delivery,
         })
 
-    return {"results": results}
+    return results
+
+
+def _background_loop() -> None:
+    """The real autonomous scheduler. Runs for the life of the process, on its own,
+    calling every registered site on a real interval — no request, no button, no human
+    has to be present. Runs in a plain thread (not an asyncio task) because the real
+    FortyGuard/OpenAI calls are blocking; putting them on the event loop would freeze
+    every other request for the minutes each cycle takes.
+    """
+    while True:
+        try:
+            fg_client = FortyGuardClient()
+            openai_client = OpenAI()
+            _run_all_sites(fg_client, openai_client)
+        except Exception:  # noqa: BLE001 - a bad cycle must not kill the loop itself
+            traceback.print_exc()
+        time.sleep(AUTONOMOUS_INTERVAL_SECONDS)
+
+
+@app.on_event("startup")
+def _start_background_loop() -> None:
+    threading.Thread(target=_background_loop, daemon=True).start()
+
+
+@app.post("/api/run")
+def run_now() -> dict:
+    """On-demand real autonomous cycle — the same real code the background loop runs,
+    just triggered immediately instead of waiting out the real interval. For a demo that
+    should not have to sit idle for an hour; the system is already running on its own
+    regardless of whether this is ever called.
+    """
+    try:
+        fg_client = FortyGuardClient()
+    except FortyGuardError as exc:
+        raise HTTPException(status_code=500, detail=f"FortyGuard client error: {exc}") from exc
+
+    openai_client = OpenAI()
+    return {"results": _run_all_sites(fg_client, openai_client)}
 
 
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")

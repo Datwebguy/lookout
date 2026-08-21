@@ -267,6 +267,11 @@ function wireAddSiteForm() {
       statusEl.textContent = "Fill in site name, latitude, longitude, role, and shift hours.";
       return;
     }
+    if (!payload.slack_webhook_url && !payload.discord_webhook_url) {
+      statusEl.className = "form-status is-error";
+      statusEl.textContent = "Add a Slack or Discord webhook so your alerts have their own channel.";
+      return;
+    }
 
     const submitBtn = form.querySelector('button[type="submit"]');
     submitBtn.disabled = true;

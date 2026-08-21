@@ -463,6 +463,7 @@ button { font: inherit; }
 .site-form input::placeholder { color: var(--text-muted); }
 .site-form input:focus-visible { outline: 2px solid var(--blue-300); outline-offset: 1px; }
 .form-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 4px; }
+.form-note { font-size: 0.85rem; color: var(--text-muted); margin: -4px 0 4px; }
 .form-status { font-size: 0.88rem; color: var(--text-muted); }
 .form-status.is-error { color: var(--risk-extreme); }
 .form-status.is-success { color: var(--risk-low); }

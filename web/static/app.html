@@ -89,13 +89,14 @@
             <label for="site-notes">Notes</label>
             <input id="site-notes" name="notes" type="text" maxlength="300" placeholder="Optional" />
           </div>
+          <p class="form-note">Alerts for your site need their own channel. Add a Slack webhook, a Discord webhook, or both, so your alerts do not land in someone else's channel.</p>
           <div class="form-row">
             <label for="site-slack">Slack webhook for this site</label>
-            <input id="site-slack" name="slack_webhook_url" type="url" placeholder="Optional, defaults to the shared channel" />
+            <input id="site-slack" name="slack_webhook_url" type="url" placeholder="https://hooks.slack.com/services/..." />
           </div>
           <div class="form-row">
             <label for="site-discord">Discord webhook for this site</label>
-            <input id="site-discord" name="discord_webhook_url" type="url" placeholder="Optional, defaults to the shared channel" />
+            <input id="site-discord" name="discord_webhook_url" type="url" placeholder="https://discord.com/api/webhooks/..." />
           </div>
           <div class="form-actions">
             <button type="submit" class="btn btn-primary">Register site</button>

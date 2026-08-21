@@ -103,5 +103,57 @@
     },
     "slack_webhook_url": null,
     "discord_webhook_url": null
+  },
+  {
+    "id": "vegas-landscaping-01",
+    "name": "North Las Vegas landscaping crew",
+    "lat": 36.1989,
+    "lon": -115.1175,
+    "worker_profile": {
+      "role": "landscaper",
+      "shift_hours": "05:00-11:00",
+      "risk_flags": [
+        "takes heat sensitive medication"
+      ],
+      "notes": "Irrigation and mowing crew, early shift to avoid the peak heat."
+    },
+    "site_polygon": {
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "properties": {},
+          "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [
+                  -115.11833489101578,
+                  36.198221721200284
+                ],
+                [
+                  -115.11666510898424,
+                  36.198221721200284
+                ],
+                [
+                  -115.11666510898424,
+                  36.19957827879972
+                ],
+                [
+                  -115.11833489101578,
+                  36.19957827879972
+                ],
+                [
+                  -115.11833489101578,
+                  36.198221721200284
+                ]
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    "slack_webhook_url": null,
+    "discord_webhook_url": null
   }
 ]
