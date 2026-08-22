@@ -262,9 +262,14 @@ function wireAddSiteForm() {
       discord_webhook_url: (data.get("discord_webhook_url") || "").toString().trim() || null,
     };
 
-    if (!payload.name || Number.isNaN(payload.lat) || Number.isNaN(payload.lon) || !payload.worker_profile.role || !payload.worker_profile.shift_hours) {
+    if (Number.isNaN(payload.lat) || Number.isNaN(payload.lon)) {
       statusEl.className = "form-status is-error";
-      statusEl.textContent = "Fill in site name, latitude, longitude, role, and shift hours.";
+      statusEl.textContent = "Find your address first, using the Find button.";
+      return;
+    }
+    if (!payload.name || !payload.worker_profile.role || !payload.worker_profile.shift_hours) {
+      statusEl.className = "form-status is-error";
+      statusEl.textContent = "Fill in site name, role, and shift hours.";
       return;
     }
     if (!payload.slack_webhook_url && !payload.discord_webhook_url) {
@@ -287,6 +292,8 @@ function wireAddSiteForm() {
       statusEl.className = "form-status is-success";
       statusEl.textContent = "Site registered. It will get its first decision on the next live check.";
       form.reset();
+      document.getElementById("location-result").textContent = "";
+      document.getElementById("location-result").className = "location-result";
       await loadAll();
     } catch (err) {
       statusEl.className = "form-status is-error";
@@ -297,8 +304,54 @@ function wireAddSiteForm() {
   });
 }
 
+function wireFindLocation() {
+  const addressInput = document.getElementById("site-address");
+  const findBtn = document.getElementById("find-location-btn");
+  const resultEl = document.getElementById("location-result");
+  const latInput = document.getElementById("site-lat");
+  const lonInput = document.getElementById("site-lon");
+  if (!addressInput || !findBtn) return;
+
+  function invalidate() {
+    latInput.value = "";
+    lonInput.value = "";
+    resultEl.textContent = "";
+    resultEl.className = "location-result";
+  }
+
+  // Editing the address after a successful find must not leave stale coordinates
+  // sitting in the hidden fields, since they would silently point somewhere else.
+  addressInput.addEventListener("input", invalidate);
+
+  findBtn.addEventListener("click", async () => {
+    const query = addressInput.value.trim();
+    if (!query) {
+      resultEl.className = "location-result is-error";
+      resultEl.textContent = "Type an address first.";
+      return;
+    }
+    findBtn.disabled = true;
+    resultEl.className = "location-result";
+    resultEl.textContent = "Looking up that address.";
+    try {
+      const result = await fetchJSON(`/api/geocode?q=${encodeURIComponent(query)}`);
+      latInput.value = result.lat;
+      lonInput.value = result.lon;
+      resultEl.className = "location-result is-found";
+      resultEl.textContent = `Found: ${result.display_name}`;
+    } catch (err) {
+      invalidate();
+      resultEl.className = "location-result is-error";
+      resultEl.textContent = `Could not find that address: ${err.message}`;
+    } finally {
+      findBtn.disabled = false;
+    }
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   loadAll();
   wireRunButton();
   wireAddSiteForm();
+  wireFindLocation();
 });

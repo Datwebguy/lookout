@@ -63,15 +63,15 @@
             <label for="site-name">Site name</label>
             <input id="site-name" name="name" type="text" required maxlength="120" placeholder="Example: North Yard Warehouse" />
           </div>
-          <div class="form-row form-row-split">
-            <div>
-              <label for="site-lat">Latitude</label>
-              <input id="site-lat" name="lat" type="number" step="any" min="-90" max="90" required placeholder="33.4484" />
+          <div class="form-row">
+            <label for="site-address">Address</label>
+            <div class="address-row">
+              <input id="site-address" type="text" placeholder="Street, city, state" autocomplete="off" />
+              <button type="button" id="find-location-btn" class="btn btn-ghost btn-small">Find</button>
             </div>
-            <div>
-              <label for="site-lon">Longitude</label>
-              <input id="site-lon" name="lon" type="number" step="any" min="-180" max="180" required placeholder="-112.0740" />
-            </div>
+            <p id="location-result" class="location-result" aria-live="polite"></p>
+            <input type="hidden" name="lat" id="site-lat" />
+            <input type="hidden" name="lon" id="site-lon" />
           </div>
           <div class="form-row">
             <label for="site-role">Worker role</label>

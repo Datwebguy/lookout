@@ -464,6 +464,12 @@ button { font: inherit; }
 .site-form input:focus-visible { outline: 2px solid var(--blue-300); outline-offset: 1px; }
 .form-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 4px; }
 .form-note { font-size: 0.85rem; color: var(--text-muted); margin: -4px 0 4px; }
+.address-row { display: flex; gap: 10px; align-items: stretch; }
+.address-row input { flex: 1; min-width: 0; }
+.address-row .btn { flex: none; }
+.location-result { font-size: 0.85rem; margin: 8px 0 0; color: var(--text-muted); }
+.location-result.is-found { color: var(--risk-low); }
+.location-result.is-error { color: var(--risk-extreme); }
 .form-status { font-size: 0.88rem; color: var(--text-muted); }
 .form-status.is-error { color: var(--risk-extreme); }
 .form-status.is-success { color: var(--risk-low); }

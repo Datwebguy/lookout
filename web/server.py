@@ -24,6 +24,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+import requests  # noqa: E402
 from fastapi import FastAPI, HTTPException  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from fastapi.responses import FileResponse  # noqa: E402
@@ -56,6 +57,39 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.get("/api/geocode")
+def geocode(q: str) -> dict:
+    """Real address to coordinates lookup via OpenStreetMap Nominatim (free, no API key).
+
+    Exists so the "Add a site" form can ask for a plain address instead of raw
+    latitude/longitude, which is not something an everyday user knows off the top of
+    their head. Restricted to US results, since FortyGuard only covers the US anyway.
+    """
+    if not q or not q.strip():
+        raise HTTPException(status_code=400, detail="Address is required")
+    try:
+        resp = requests.get(
+            "https://nominatim.openstreetmap.org/search",
+            params={"q": q, "format": "json", "limit": 1, "countrycodes": "us"},
+            headers={"User-Agent": "LookoutHeatSafetyAgent/1.0"},
+            timeout=10,
+        )
+        resp.raise_for_status()
+    except requests.RequestException as exc:
+        raise HTTPException(status_code=502, detail=f"Geocoding service error: {exc}") from exc
+
+    results = resp.json()
+    if not results:
+        raise HTTPException(status_code=404, detail="No US location found for that address")
+
+    top = results[0]
+    return {
+        "lat": float(top["lat"]),
+        "lon": float(top["lon"]),
+        "display_name": top.get("display_name", q),
+    }
 
 
 def _read_jsonl(path: Path, limit: int | None = None) -> list[dict]:
