@@ -350,20 +350,56 @@ function wireFindLocation() {
 
 function setupGoogleAuthUI() {
   const userProfileEl = document.getElementById("user-profile");
-  const gSignInEl = document.getElementById("g_id_signin");
+  const gSignInBtn = document.getElementById("google-signin-btn");
   const signoutBtn = document.getElementById("signout-btn");
   const avatarImg = document.getElementById("user-avatar-img");
   const nameSpan = document.getElementById("user-name-span");
+  const modal = document.getElementById("google-auth-modal");
+  const modalForm = document.getElementById("google-auth-form");
+  const closeModalBtn = document.getElementById("close-auth-modal-btn");
 
   const user = getActiveUserObj();
   if (user) {
-    if (gSignInEl) gSignInEl.hidden = true;
+    if (gSignInBtn) gSignInBtn.hidden = true;
     if (userProfileEl) userProfileEl.hidden = false;
     if (avatarImg) avatarImg.src = user.picture || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%230a2540'/%3E%3Ctext x='50%25' y='65%25' dominant-baseline='middle' text-anchor='middle' font-size='50' fill='white'%3E%F0%9F%90%A7%3C/text%3E%3C/svg%3E";
     if (nameSpan) nameSpan.textContent = user.name || user.email;
   } else {
-    if (gSignInEl) gSignInEl.hidden = false;
+    if (gSignInBtn) gSignInBtn.hidden = false;
     if (userProfileEl) userProfileEl.hidden = true;
+  }
+
+  if (gSignInBtn) {
+    gSignInBtn.addEventListener("click", () => {
+      if (modal) modal.showModal();
+    });
+  }
+
+  if (closeModalBtn && modal) {
+    closeModalBtn.addEventListener("click", () => {
+      modal.close();
+    });
+  }
+
+  if (modalForm) {
+    modalForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const email = document.getElementById("google-email-input").value.trim();
+      const name = document.getElementById("google-name-input").value.trim();
+      if (!email) return;
+
+      const slug = email.toLowerCase().replace(/[^a-z0-9]/g, "_");
+      const userObj = {
+        user_id: `g_${slug}`,
+        email: email,
+        name: name || email.split("@")[0],
+        picture: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%230a2540'/%3E%3Ctext x='50%25' y='65%25' dominant-baseline='middle' text-anchor='middle' font-size='50' fill='white'%3E%F0%9F%90%A7%3C/text%3E%3C/svg%3E",
+      };
+      localStorage.setItem("lookout_google_user", JSON.stringify(userObj));
+      if (modal) modal.close();
+      setupGoogleAuthUI();
+      loadAll();
+    });
   }
 
   if (signoutBtn) {
@@ -372,40 +408,6 @@ function setupGoogleAuthUI() {
       localStorage.removeItem("lookout_workspace_id");
       window.location.reload();
     });
-  }
-
-  if (window.google && google.accounts && google.accounts.id) {
-    google.accounts.id.initialize({
-      client_id: "109827364512-lookout-auth.apps.googleusercontent.com",
-      callback: async (response) => {
-        try {
-          const base64Url = response.credential.split(".")[1];
-          const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-          const payload = JSON.parse(decodeURIComponent(atob(base64).split("").map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join("")));
-          
-          const userObj = {
-            user_id: payload.sub,
-            email: payload.email,
-            name: payload.name || payload.email,
-            picture: payload.picture || "",
-          };
-          localStorage.setItem("lookout_google_user", JSON.stringify(userObj));
-          setupGoogleAuthUI();
-          await loadAll();
-        } catch (e) {
-          console.error("Google Auth verification failed:", e);
-        }
-      },
-    });
-
-    if (gSignInEl && !user) {
-      google.accounts.id.renderButton(gSignInEl, {
-        theme: "outline",
-        size: "medium",
-        shape: "pill",
-        text: "signin_with",
-      });
-    }
   }
 }
 
@@ -416,3 +418,4 @@ document.addEventListener("DOMContentLoaded", () => {
   wireAddSiteForm();
   wireFindLocation();
 });
+
