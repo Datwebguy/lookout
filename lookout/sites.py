@@ -32,6 +32,7 @@ class Site:
     # SLACK_WEBHOOK_URL / DISCORD_WEBHOOK_URL" (see lookout/notify.py).
     slack_webhook_url: str | None = None
     discord_webhook_url: str | None = None
+    workspace_id: str = "default"
 
     def __post_init__(self) -> None:
         if isinstance(self.worker_profile, dict):
@@ -59,7 +60,9 @@ def save_sites(sites: list[Site], path: str | Path) -> None:
             "site_polygon": s.site_polygon,
             "slack_webhook_url": s.slack_webhook_url,
             "discord_webhook_url": s.discord_webhook_url,
+            "workspace_id": s.workspace_id,
         }
         for s in sites
     ]
     Path(path).write_text(json.dumps(payload, indent=2))
+

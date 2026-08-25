@@ -33,6 +33,8 @@ from fortyguard import FortyGuardClient  # noqa: E402
 from fortyguard.exceptions import FortyGuardError  # noqa: E402
 from openai import OpenAI  # noqa: E402
 from pydantic import BaseModel, Field, model_validator  # noqa: E402
+from google.oauth2 import id_token  # noqa: E402
+from google.auth.transport import requests as google_requests  # noqa: E402
 
 from lookout.notify import DeliveryLog, WebhookNotifier  # noqa: E402
 from lookout.proactive import AlertLog, DecisionLog, decide_and_act  # noqa: E402
@@ -59,14 +61,32 @@ app.add_middleware(
 )
 
 
+class GoogleAuthToken(BaseModel):
+    credential: str
+
+
+@app.post("/api/auth/google")
+def verify_google_token(payload: GoogleAuthToken) -> dict:
+    """Verify Google ID Token from Google Identity Services SDK."""
+    token = payload.credential
+    if not token:
+        raise HTTPException(status_code=400, detail="Token is required")
+    try:
+        req = google_requests.Request()
+        id_info = id_token.verify_oauth2_token(token, req)
+        return {
+            "user_id": id_info.get("sub"),
+            "email": id_info.get("email"),
+            "name": id_info.get("name", id_info.get("email")),
+            "picture": id_info.get("picture", ""),
+        }
+    except Exception as exc:
+        raise HTTPException(status_code=401, detail=f"Invalid Google ID token: {exc}") from exc
+
+
 @app.get("/api/geocode")
 def geocode(q: str) -> dict:
-    """Real address to coordinates lookup via OpenStreetMap Nominatim (free, no API key).
-
-    Exists so the "Add a site" form can ask for a plain address instead of raw
-    latitude/longitude, which is not something an everyday user knows off the top of
-    their head. Restricted to US results, since FortyGuard only covers the US anyway.
-    """
+    """Real address to coordinates lookup via OpenStreetMap Nominatim (free, no API key)."""
     if not q or not q.strip():
         raise HTTPException(status_code=400, detail="Address is required")
     try:
@@ -102,8 +122,10 @@ def _read_jsonl(path: Path, limit: int | None = None) -> list[dict]:
 
 
 @app.get("/api/sites")
-def get_sites() -> list[dict]:
+def get_sites(user_id: str | None = None) -> list[dict]:
     sites = load_sites(SITES_PATH)
+    if user_id:
+        sites = [s for s in sites if getattr(s, "workspace_id", "default") == user_id]
     return [
         {
             "id": s.id,
@@ -116,8 +138,7 @@ def get_sites() -> list[dict]:
                 "risk_flags": s.worker_profile.risk_flags,
                 "notes": s.worker_profile.notes,
             },
-            # Never echo the real webhook URL back to the client — this dashboard has
-            # no login, so anyone with the link could read and reuse it. Booleans only.
+            "workspace_id": getattr(s, "workspace_id", "default"),
             "has_slack_webhook": bool(s.slack_webhook_url),
             "has_discord_webhook": bool(s.discord_webhook_url),
         }
@@ -139,18 +160,13 @@ class SiteIn(BaseModel):
     worker_profile: WorkerProfileIn
     slack_webhook_url: str | None = None
     discord_webhook_url: str | None = None
+    workspace_id: str = "default"
 
     @model_validator(mode="after")
     def _require_a_real_webhook(self) -> "SiteIn":
-        # There is no login on this dashboard, so the server-wide default webhook is
-        # effectively shared by anyone who registers a site without their own. Requiring
-        # a real webhook here is what stops one registrant's alerts from silently landing
-        # in another registrant's channel.
         if not (self.slack_webhook_url or self.discord_webhook_url):
             raise ValueError(
-                "A Slack or Discord webhook is required. Without one, your alerts would "
-                "go to the shared default channel, where other registered sites' alerts "
-                "also go."
+                "A Slack or Discord webhook is required so your alerts land in your private channel."
             )
         return self
 
@@ -162,9 +178,6 @@ def _slugify(name: str) -> str:
 
 @app.post("/api/sites", status_code=201)
 def create_site(payload: SiteIn) -> dict:
-    """Register a real new site. Writes straight into the same sites.json the
-    scheduler/dashboard reads from — no separate mock store.
-    """
     sites = load_sites(SITES_PATH)
     existing_ids = {s.id for s in sites}
     base_id = _slugify(payload.name)
@@ -182,29 +195,34 @@ def create_site(payload: SiteIn) -> dict:
         worker_profile=WorkerProfile(**payload.worker_profile.model_dump()),
         slack_webhook_url=payload.slack_webhook_url or None,
         discord_webhook_url=payload.discord_webhook_url or None,
+        workspace_id=payload.workspace_id,
     )
     sites.append(new_site)
     save_sites(sites, SITES_PATH)
-    return {"id": new_site.id, "name": new_site.name}
+    return {"id": new_site.id, "name": new_site.name, "workspace_id": new_site.workspace_id}
 
 
 @app.get("/api/decisions")
-def get_decisions(limit: int = 50) -> list[dict]:
-    return _read_jsonl(DECISION_LOG_PATH, limit)
+def get_decisions(user_id: str | None = None, limit: int = 50) -> list[dict]:
+    records = _read_jsonl(DECISION_LOG_PATH, limit=None)
+    if user_id:
+        records = [r for r in records if r.get("workspace_id") == user_id]
+    return records[:limit]
 
 
 @app.get("/api/alerts")
-def get_alerts(limit: int = 50) -> list[dict]:
-    return _read_jsonl(ALERT_LOG_PATH, limit)
+def get_alerts(user_id: str | None = None, limit: int = 50) -> list[dict]:
+    records = _read_jsonl(ALERT_LOG_PATH, limit=None)
+    if user_id:
+        records = [r for r in records if r.get("workspace_id") == user_id]
+    return records[:limit]
 
 
-def _run_all_sites(fg_client: FortyGuardClient, openai_client: OpenAI) -> list[dict]:
-    """One real autonomous cycle over every registered site. Shared by the always-on
-    background loop and the on-demand /api/run endpoint — the same real code path either
-    way, so "run it now" is never a different, lighter-weight thing than what the
-    background loop actually does.
-    """
+def _run_all_sites(fg_client: FortyGuardClient, openai_client: OpenAI, filter_user_id: str | None = None) -> list[dict]:
     sites = load_sites(SITES_PATH)
+    if filter_user_id:
+        sites = [s for s in sites if getattr(s, "workspace_id", "default") == filter_user_id]
+
     decision_log = DecisionLog(DECISION_LOG_PATH)
     alert_log = AlertLog(ALERT_LOG_PATH)
     delivery_log = DeliveryLog(DELIVERY_LOG_PATH)
@@ -216,13 +234,12 @@ def _run_all_sites(fg_client: FortyGuardClient, openai_client: OpenAI) -> list[d
                 openai_client, fg_client, site, decision_log, alert_log,
                 threshold_celsius=THRESHOLD_CELSIUS, baseline_years=BASELINE_YEARS,
             )
-        except Exception as exc:  # noqa: BLE001 - surface any real failure, never swallow it
+        except Exception as exc:
             results.append({"site_id": site.id, "site_name": site.name, "error": str(exc)})
             continue
 
         delivery = None
         if alert is not None:
-            # A site's own webhook (if it has one) wins over the server-wide default.
             notifier = WebhookNotifier(
                 slack_url=site.slack_webhook_url, discord_url=site.discord_webhook_url,
             )
@@ -237,6 +254,7 @@ def _run_all_sites(fg_client: FortyGuardClient, openai_client: OpenAI) -> list[d
             "recommended_action": decision.recommended_action,
             "timing": decision.timing,
             "rationale": decision.rationale,
+            "workspace_id": getattr(decision, "workspace_id", "default"),
             "alert": None if alert is None else {
                 "message": alert.message,
                 "projected_celsius": alert.projected_celsius,
@@ -248,6 +266,7 @@ def _run_all_sites(fg_client: FortyGuardClient, openai_client: OpenAI) -> list[d
         })
 
     return results
+
 
 
 def _background_loop() -> None:
@@ -273,19 +292,15 @@ def _start_background_loop() -> None:
 
 
 @app.post("/api/run")
-def run_now() -> dict:
-    """On-demand real autonomous cycle — the same real code the background loop runs,
-    just triggered immediately instead of waiting out the real interval. For a demo that
-    should not have to sit idle for an hour; the system is already running on its own
-    regardless of whether this is ever called.
-    """
+def run_now(user_id: str | None = None) -> dict:
     try:
         fg_client = FortyGuardClient()
     except FortyGuardError as exc:
         raise HTTPException(status_code=500, detail=f"FortyGuard client error: {exc}") from exc
 
     openai_client = OpenAI()
-    return {"results": _run_all_sites(fg_client, openai_client)}
+    return {"results": _run_all_sites(fg_client, openai_client, filter_user_id=user_id)}
+
 
 
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")

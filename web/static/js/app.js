@@ -1,6 +1,4 @@
-// Lookout dashboard. Fetches only real data from the backend. Nothing here is mocked:
-// every number rendered on this page came from a real FortyGuard or OpenAI call logged
-// by the Python agent.
+// Lookout dashboard. Real data only, scoped by user Google identity / workspace session.
 
 const RISK_CLASS = {
   low: "risk-low",
@@ -9,20 +7,40 @@ const RISK_CLASS = {
   extreme: "risk-extreme",
 };
 
+function getActiveUserId() {
+  const googleUser = localStorage.getItem("lookout_google_user");
+  if (googleUser) {
+    try {
+      const parsed = JSON.parse(googleUser);
+      if (parsed && parsed.user_id) return parsed.user_id;
+    } catch (e) {
+      // ignore invalid json
+    }
+  }
+  let localId = localStorage.getItem("lookout_workspace_id");
+  if (!localId) {
+    localId = "ws_" + Math.random().toString(36).substring(2, 11);
+    localStorage.setItem("lookout_workspace_id", localId);
+  }
+  return localId;
+}
+
+function getActiveUserObj() {
+  const googleUser = localStorage.getItem("lookout_google_user");
+  if (googleUser) {
+    try {
+      return JSON.parse(googleUser);
+    } catch (e) {}
+  }
+  return null;
+}
+
 function riskBadge(riskLevel) {
   const cls = RISK_CLASS[riskLevel] || "risk-moderate";
   const span = document.createElement("span");
   span.className = `risk-badge ${cls}`;
   span.textContent = riskLevel ? riskLevel.toUpperCase() : "UNKNOWN";
   return span;
-}
-
-function extractNowReading(decision) {
-  const inputs = decision.real_inputs || [];
-  const temps = inputs.filter((i) => i.tool === "get_current_temperature" && i.result && i.result.celsius != null);
-  if (temps.length) return temps[temps.length - 1].result.celsius;
-  const forward = inputs.find((i) => i.tool === "get_forward_and_baseline" && i.result && i.result.actual_now_celsius != null);
-  return forward ? forward.result.actual_now_celsius : null;
 }
 
 function timeAgo(isoString) {
@@ -54,39 +72,18 @@ function latestDecisionPerSite(decisions) {
   return map;
 }
 
-function renderMoneyShot(decisions) {
-  const container = document.getElementById("money-shot-cards");
-  container.innerHTML = "";
-  const latest = latestDecisionPerSite(decisions);
-  if (latest.size === 0) {
-    container.innerHTML = '<p class="empty-state">No decisions yet. Run a live check to see real per site results.</p>';
-    return;
-  }
-  for (const d of latest.values()) {
-    const card = document.createElement("div");
-    card.className = "money-card";
-    const temp = extractNowReading(d);
-    card.appendChild(riskBadge(d.risk_level));
-    const tempEl = document.createElement("p");
-    tempEl.className = "money-card-temp";
-    tempEl.textContent = temp != null ? `${temp.toFixed(1)}°C` : "No reading";
-    const siteEl = document.createElement("p");
-    siteEl.className = "money-card-site";
-    siteEl.textContent = d.site_name;
-    const roleEl = document.createElement("p");
-    roleEl.className = "money-card-role";
-    roleEl.textContent = d.worker_role;
-    const actionEl = document.createElement("p");
-    actionEl.className = "money-card-action";
-    actionEl.textContent = d.recommended_action;
-    card.append(tempEl, siteEl, roleEl, actionEl);
-    container.appendChild(card);
-  }
-}
-
 function renderSiteGrid(sites, decisions) {
   const grid = document.getElementById("site-grid");
   grid.innerHTML = "";
+  if (!sites.length) {
+    grid.innerHTML = `
+      <div class="empty-sites" style="grid-column: 1 / -1;">
+        <p><strong>No registered outdoor sites in your workspace yet.</strong></p>
+        <p style="font-size: 0.9em; margin-top: 6px; color: var(--text-muted);">Click "Add a site" above to register your first worksite and configure heat safety webhooks.</p>
+      </div>
+    `;
+    return;
+  }
   const latest = latestDecisionPerSite(decisions);
   for (const site of sites) {
     const card = document.createElement("article");
@@ -132,7 +129,7 @@ function renderFeed(decisions) {
   const feed = document.getElementById("decision-feed");
   feed.innerHTML = "";
   if (!decisions.length) {
-    feed.innerHTML = '<p class="empty-state">No decisions yet.</p>';
+    feed.innerHTML = '<p class="empty-state">No autonomous decisions recorded for your workspace yet.</p>';
     return;
   }
   for (const d of decisions.slice(0, 20)) {
@@ -157,7 +154,7 @@ function renderFeed(decisions) {
 
     const details = document.createElement("details");
     const summary = document.createElement("summary");
-    summary.textContent = "Why: real inputs and rationale";
+    summary.textContent = "Why: operational inputs & rationale";
     const rationale = document.createElement("p");
     rationale.className = "rationale";
     rationale.textContent = d.rationale;
@@ -169,25 +166,26 @@ function renderFeed(decisions) {
 }
 
 function setUpdating(isUpdating) {
-  for (const id of ["money-shot-cards", "site-grid", "decision-feed"]) {
-    document.getElementById(id).classList.toggle("is-updating", isUpdating);
+  for (const id of ["site-grid", "decision-feed"]) {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle("is-updating", isUpdating);
   }
 }
 
 async function loadAll() {
   const statusEl = document.getElementById("run-status");
+  const userId = getActiveUserId();
   try {
     const [sites, decisions] = await Promise.all([
-      fetchJSON("/api/sites"),
-      fetchJSON("/api/decisions?limit=50"),
+      fetchJSON(`/api/sites?user_id=${encodeURIComponent(userId)}`),
+      fetchJSON(`/api/decisions?user_id=${encodeURIComponent(userId)}&limit=50`),
     ]);
-    renderMoneyShot(decisions);
     renderSiteGrid(sites, decisions);
     renderFeed(decisions);
   } catch (err) {
     statusEl.hidden = false;
     statusEl.className = "run-status is-error";
-    statusEl.textContent = `Could not load data: ${err.message}`;
+    statusEl.textContent = `Could not load workspace data: ${err.message}`;
   }
 }
 
@@ -209,14 +207,15 @@ function wireRunButton() {
       spinner.className = "spinner";
       spinner.setAttribute("aria-hidden", "true");
       const text = document.createElement("span");
-      text.textContent = `Checking every site right now. This can take a minute or two. ${secs}s elapsed.`;
+      text.textContent = `Running heat safety check across your workspace sites. ${secs}s elapsed.`;
       statusEl.append(spinner, text);
     };
     updateElapsed();
     timerHandle = setInterval(updateElapsed, 1000);
 
     try {
-      const data = await fetchJSON("/api/run", { method: "POST" });
+      const userId = getActiveUserId();
+      const data = await fetchJSON(`/api/run?user_id=${encodeURIComponent(userId)}`, { method: "POST" });
       clearInterval(timerHandle);
       const failed = data.results.filter((r) => r.error);
       if (failed.length) {
@@ -224,13 +223,13 @@ function wireRunButton() {
         statusEl.textContent = `Finished with ${failed.length} error(s). ${failed.map((f) => `${f.site_name}: ${f.error}`).join(" ")}`;
       } else {
         statusEl.className = "run-status is-success";
-        statusEl.textContent = `Done. ${data.results.length} new real decision(s) below.`;
+        statusEl.textContent = `Done. ${data.results.length} site(s) checked.`;
       }
       await loadAll();
     } catch (err) {
       clearInterval(timerHandle);
       statusEl.className = "run-status is-error";
-      statusEl.textContent = `The live check failed: ${err.message}`;
+      statusEl.textContent = `The safety check failed: ${err.message}`;
     } finally {
       setUpdating(false);
       btn.disabled = false;
@@ -247,6 +246,7 @@ function wireAddSiteForm() {
     event.preventDefault();
     const data = new FormData(form);
     const riskFlagsRaw = (data.get("risk_flags") || "").toString().trim();
+    const userId = getActiveUserId();
 
     const payload = {
       name: (data.get("name") || "").toString().trim(),
@@ -260,6 +260,7 @@ function wireAddSiteForm() {
       },
       slack_webhook_url: (data.get("slack_webhook_url") || "").toString().trim() || null,
       discord_webhook_url: (data.get("discord_webhook_url") || "").toString().trim() || null,
+      workspace_id: userId,
     };
 
     if (Number.isNaN(payload.lat) || Number.isNaN(payload.lon)) {
@@ -281,7 +282,7 @@ function wireAddSiteForm() {
     const submitBtn = form.querySelector('button[type="submit"]');
     submitBtn.disabled = true;
     statusEl.className = "form-status";
-    statusEl.textContent = "Registering the site.";
+    statusEl.textContent = "Registering your site.";
 
     try {
       await fetchJSON("/api/sites", {
@@ -290,7 +291,7 @@ function wireAddSiteForm() {
         body: JSON.stringify(payload),
       });
       statusEl.className = "form-status is-success";
-      statusEl.textContent = "Site registered. It will get its first decision on the next live check.";
+      statusEl.textContent = "Site registered successfully. Safety checks will execute on your active schedule.";
       form.reset();
       document.getElementById("location-result").textContent = "";
       document.getElementById("location-result").className = "location-result";
@@ -319,8 +320,6 @@ function wireFindLocation() {
     resultEl.className = "location-result";
   }
 
-  // Editing the address after a successful find must not leave stale coordinates
-  // sitting in the hidden fields, since they would silently point somewhere else.
   addressInput.addEventListener("input", invalidate);
 
   findBtn.addEventListener("click", async () => {
@@ -332,7 +331,7 @@ function wireFindLocation() {
     }
     findBtn.disabled = true;
     resultEl.className = "location-result";
-    resultEl.textContent = "Looking up that address.";
+    resultEl.textContent = "Looking up address.";
     try {
       const result = await fetchJSON(`/api/geocode?q=${encodeURIComponent(query)}`);
       latInput.value = result.lat;
@@ -342,14 +341,76 @@ function wireFindLocation() {
     } catch (err) {
       invalidate();
       resultEl.className = "location-result is-error";
-      resultEl.textContent = `Could not find that address: ${err.message}`;
+      resultEl.textContent = `Could not find address: ${err.message}`;
     } finally {
       findBtn.disabled = false;
     }
   });
 }
 
+function setupGoogleAuthUI() {
+  const userProfileEl = document.getElementById("user-profile");
+  const gSignInEl = document.getElementById("g_id_signin");
+  const signoutBtn = document.getElementById("signout-btn");
+  const avatarImg = document.getElementById("user-avatar-img");
+  const nameSpan = document.getElementById("user-name-span");
+
+  const user = getActiveUserObj();
+  if (user) {
+    if (gSignInEl) gSignInEl.hidden = true;
+    if (userProfileEl) userProfileEl.hidden = false;
+    if (avatarImg) avatarImg.src = user.picture || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%230a2540'/%3E%3Ctext x='50%25' y='65%25' dominant-baseline='middle' text-anchor='middle' font-size='50' fill='white'%3E%F0%9F%90%A7%3C/text%3E%3C/svg%3E";
+    if (nameSpan) nameSpan.textContent = user.name || user.email;
+  } else {
+    if (gSignInEl) gSignInEl.hidden = false;
+    if (userProfileEl) userProfileEl.hidden = true;
+  }
+
+  if (signoutBtn) {
+    signoutBtn.addEventListener("click", () => {
+      localStorage.removeItem("lookout_google_user");
+      localStorage.removeItem("lookout_workspace_id");
+      window.location.reload();
+    });
+  }
+
+  if (window.google && google.accounts && google.accounts.id) {
+    google.accounts.id.initialize({
+      client_id: "109827364512-lookout-auth.apps.googleusercontent.com",
+      callback: async (response) => {
+        try {
+          const base64Url = response.credential.split(".")[1];
+          const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+          const payload = JSON.parse(decodeURIComponent(atob(base64).split("").map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join("")));
+          
+          const userObj = {
+            user_id: payload.sub,
+            email: payload.email,
+            name: payload.name || payload.email,
+            picture: payload.picture || "",
+          };
+          localStorage.setItem("lookout_google_user", JSON.stringify(userObj));
+          setupGoogleAuthUI();
+          await loadAll();
+        } catch (e) {
+          console.error("Google Auth verification failed:", e);
+        }
+      },
+    });
+
+    if (gSignInEl && !user) {
+      google.accounts.id.renderButton(gSignInEl, {
+        theme: "outline",
+        size: "medium",
+        shape: "pill",
+        text: "signin_with",
+      });
+    }
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
+  setupGoogleAuthUI();
   loadAll();
   wireRunButton();
   wireAddSiteForm();

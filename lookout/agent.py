@@ -48,10 +48,11 @@ SYSTEM_PROMPT = (
     "nearly flat; DURATION above a danger threshold is what actually separates a dangerous "
     "day from a normal one, so weigh the exceedance-duration signal heavily, not just the "
     "current or projected temperature. Personalize your decision to the specific worker "
-    "profile given (role, shift hours, risk flags) — the same weather should produce a "
-    "different decision for a construction laborer with no shade than for a delivery "
-    "driver with a cardiac history. Call whichever tools you need, in whatever order makes "
-    "sense, before producing your final decision."
+    "profile given (role, shift hours, risk flags). CRITICAL PRIVACY REQUIREMENT: In your "
+    "rationale and recommended_action fields, provide professional operational safety guidance "
+    "(e.g., 'elevated heat sensitivity profile', 'high-risk vulnerability classification', or 'increased cardiovascular heat stress risk') "
+    "and NEVER repeat or broadcast explicit medical condition names, diagnoses, or raw worker PII in text logs. "
+    "Call whichever tools you need, in whatever order makes sense, before producing your final decision."
 )
 
 
@@ -64,10 +65,12 @@ class Decision:
     site_id: str
     site_name: str
     worker_role: str
+    workspace_id: str = "default"
     # Every real tool call the agent made to reach this decision — {"tool", "args", "result"}
     # per call — so the decision log can show the real inputs, not just the LLM's prose
     # (PRD FR6). Never fabricated: populated only from actual FortyGuard-backed tool results.
     real_inputs: list[dict] = field(default_factory=list)
+
 
 
 def _make_tools(client: FortyGuardClient, site: Site, anchor_date: str, baseline_years: list[int]):
@@ -260,5 +263,7 @@ def decide(
         site_id=site.id,
         site_name=site.name,
         worker_role=site.worker_profile.role,
+        workspace_id=getattr(site, "workspace_id", "default"),
         real_inputs=real_inputs,
     )
+

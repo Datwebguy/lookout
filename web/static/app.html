@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/css/styles.css" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%8D%3C/text%3E%3C/svg%3E">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -22,9 +23,18 @@
     </a>
     <nav class="site-nav" aria-label="Primary">
       <a href="/">Home</a>
+      <div id="auth-container" class="auth-box">
+        <div id="g_id_signin"></div>
+        <div id="user-profile" hidden class="user-badge">
+          <img id="user-avatar-img" class="user-avatar" alt="Avatar" />
+          <span id="user-name-span">User</span>
+          <button id="signout-btn" class="btn btn-ghost btn-small" type="button" style="padding: 2px 8px; margin-left: 6px;">Sign Out</button>
+        </div>
+      </div>
     </nav>
   </div>
 </header>
+
 
 <main id="main" class="app-main">
   <div class="wrap">
@@ -93,26 +103,9 @@
       </div>
     </section>
 
-    <section class="panel" id="problem">
-      <h2>One number versus a real decision</h2>
-      <p class="panel-sub">A typical weather app, next to what Lookout actually sees.</p>
-      <div class="comparison">
-        <div class="compare-card compare-weather">
-          <p class="compare-label">Typical weather app</p>
-          <p class="compare-number">38°C</p>
-          <p class="compare-place">Phoenix, AZ</p>
-          <p class="compare-note">One number for the whole city.</p>
-        </div>
-        <div class="compare-arrow" aria-hidden="true">→</div>
-        <div class="compare-card compare-lookout" id="money-shot-cards">
-          <p class="live-loading">Loading real decisions.</p>
-        </div>
-      </div>
-    </section>
-
     <section class="panel" id="feed">
-      <h2>Decision log</h2>
-      <p class="panel-sub">Every autonomous decision, with the real inputs behind it.</p>
+      <h2>Your decision log</h2>
+      <p class="panel-sub">Autonomous heat-safety decisions for your registered sites.</p>
       <div class="feed" id="decision-feed">
         <p class="live-loading">Loading decision history.</p>
       </div>

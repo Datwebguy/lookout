@@ -269,6 +269,47 @@ button { font: inherit; }
   text-transform: uppercase;
   color: var(--text-muted);
 }
+.footer-inner span:last-child {
+  color: var(--text-muted);
+}
+
+/* User Auth Badge & Session Bar */
+.auth-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-paper);
+  border: 1px solid var(--border-subtle);
+  padding: 4px 10px;
+  border-radius: var(--radius-lg);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.user-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--blue-100);
+}
+
+.empty-sites {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  background: var(--bg-paper);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+}
+
 .preview-frame-body { padding: 20px; text-align: left; }
 .preview-site { font-weight: 600; font-size: 1rem; margin: 0.6em 0 0.15em; }
 .preview-role { color: var(--text-muted); font-size: 0.84rem; margin: 0 0 0.8em; }
