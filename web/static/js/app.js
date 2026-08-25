@@ -378,7 +378,6 @@ async function setupGoogleAuthUI() {
   const userProfileEl = document.getElementById("user-profile");
   const signoutBtn = document.getElementById("signout-btn");
   const avatarImg = document.getElementById("user-avatar-img");
-  const nameSpan = document.getElementById("user-name-span");
   const authGateScreen = document.getElementById("auth-gate-screen");
   const mainWorkspace = document.getElementById("main");
   const gateContainer = document.getElementById("g_id_signin_gate");
@@ -387,14 +386,17 @@ async function setupGoogleAuthUI() {
   const user = getActiveUserObj();
   if (user) {
     if (userProfileEl) userProfileEl.hidden = false;
-    if (avatarImg) avatarImg.src = user.picture || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%230a2540'/%3E%3Ctext x='50%25' y='65%25' dominant-baseline='middle' text-anchor='middle' font-size='50' fill='white'%3E%F0%9F%90%A7%3C/text%3E%3C/svg%3E";
-    if (nameSpan) nameSpan.textContent = user.name || user.email;
+    if (avatarImg) {
+      avatarImg.src = user.picture || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%230a2540'/%3E%3Ctext x='50%25' y='65%25' dominant-baseline='middle' text-anchor='middle' font-size='50' fill='white'%3E%F0%9F%90%A7%3C/text%3E%3C/svg%3E";
+      avatarImg.title = user.email || user.name || "Google Account";
+    }
     if (authGateScreen) authGateScreen.hidden = true;
     if (mainWorkspace) mainWorkspace.hidden = false;
   } else {
     if (userProfileEl) userProfileEl.hidden = true;
     if (authGateScreen) authGateScreen.hidden = false;
     if (mainWorkspace) mainWorkspace.hidden = true;
+
 
     let clientId = "";
     try {
