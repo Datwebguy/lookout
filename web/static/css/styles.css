@@ -206,12 +206,13 @@ button { font: inherit; }
   color: var(--text-primary);
 }
 .brand-mark {
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
-  background: linear-gradient(135deg, var(--warm-2), var(--warm-3));
-  box-shadow: 0 0 12px rgba(255, 61, 143, 0.45);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: url('/static/img/logo.svg') no-repeat center / contain;
+  display: inline-block;
 }
+
 .site-nav { display: flex; align-items: center; gap: clamp(14px, 3vw, 24px); font-size: 0.95rem; }
 .site-nav a:not(.btn) { text-decoration: none; color: var(--text-secondary); transition: color 0.15s ease; }
 .site-nav a:not(.btn):hover { color: var(--blue-300); }
@@ -418,13 +419,13 @@ button { font: inherit; }
 }
 
 .brand-mark-lg {
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, var(--warm-2), var(--warm-3));
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
+  background: url('/static/img/logo.svg') no-repeat center / contain;
   display: inline-block;
-  box-shadow: 0 10px 25px rgba(255, 61, 143, 0.3);
 }
+
 
 .auth-card h2 {
   font-family: var(--font-display);
@@ -724,12 +725,13 @@ button { font: inherit; }
 }
 
 .brand-mark-editorial {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  background: var(--color-deep-teal);
+  background: url('/static/img/logo.svg') no-repeat center / contain;
   display: inline-block;
 }
+
 
 .brand-text {
   font-family: var(--font-serif);
