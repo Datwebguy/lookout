@@ -404,11 +404,8 @@ async function setupGoogleAuthUI() {
       clientId = cfg.google_client_id || "";
     } catch (e) {}
 
-    if (!clientId) {
-      clientId = "239352907733-6pkm260rhpf8h3hb0sdif7e4dschl8dj.apps.googleusercontent.com";
-    }
+    if (clientId && window.google && google.accounts && google.accounts.id) {
 
-    if (window.google && google.accounts && google.accounts.id) {
       if (statusMsg) statusMsg.textContent = "";
       google.accounts.id.initialize({
         client_id: clientId,

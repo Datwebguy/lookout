@@ -1,4 +1,4 @@
-# 🔍 Lookout: Autonomous Microclimate Heat Safety Agent
+# Lookout: Autonomous Microclimate Heat Safety Agent
 
 * **Live Production Platform:** https://lookoutapp.fly.dev
 * **Interactive Operations Dashboard:** https://lookoutapp.fly.dev/app
@@ -108,16 +108,16 @@ pip install -r requirements.txt
 ```
 
 ### Step 4: Configure Environment Credentials
-Copy `.env.example` to `.env`:
+Copy configuration template:
 ```bash
 cp .env.example .env
 ```
 
-Set your configuration variables inside `.env`:
+Set your configuration variables:
 ```env
 FORTYGUARD_API_KEY=your_fortyguard_api_key
 OPENAI_API_KEY=your_openai_api_key
-GOOGLE_CLIENT_ID=239352907733-6pkm260rhpf8h3hb0sdif7e4dschl8dj.apps.googleusercontent.com
+GOOGLE_CLIENT_ID=your_google_client_id
 SLACK_WEBHOOK_URL=your_slack_webhook_url
 ```
 
@@ -171,7 +171,7 @@ Lookout leverages FortyGuard's core endpoints:
 * **Primary Track:** Track 06 Agentic AI (Autonomous execution, tool calling, proactive decision making without human prompting).
 * **Secondary Categories:** Cities (Track 01) and Government (Track 04).
 * **GitHub Repository Access:** Added `Hackathon:FG` as collaborator.
-* **Credentials Security:** Secrets and API keys are stored exclusively in server side environment variables and `.env` (git ignored).
+* **Credentials Security:** Secrets and API keys are stored exclusively in server side environment variables.
 
 ---
 

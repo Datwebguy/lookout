@@ -70,6 +70,16 @@ def get_config() -> dict:
     }
 
 
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    return FileResponse(
+        STATIC_DIR / "img" / "logo.svg",
+        media_type="image/svg+xml",
+        headers={"Cache-Control": "no-cache, no-store, must-revalidate"},
+    )
+
+
+
 class GoogleAuthToken(BaseModel):
     credential: str
 
