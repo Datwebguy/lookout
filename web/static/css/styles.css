@@ -44,7 +44,9 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html { scroll-behavior: smooth; }
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
@@ -360,6 +362,98 @@ button { font: inherit; }
   border-radius: var(--radius-md);
   color: var(--text-secondary);
 }
+
+/* Dedicated Sign-In Screen / Gate */
+.auth-gate-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(80vh - 100px);
+  padding: 2rem 1rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem 2rem;
+  box-shadow: var(--shadow-card);
+  text-align: center;
+}
+
+.brand-logo-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 0.5rem;
+}
+
+.brand-mark-lg {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, var(--warm-2), var(--warm-3));
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 10px 25px rgba(255, 61, 143, 0.3);
+}
+
+.auth-card h2 {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.auth-card-sub {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin: 0.5rem 0 1.8rem;
+  line-height: 1.5;
+}
+
+.google-btn-lg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 15px;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(10, 37, 64, 0.06);
+  transition: all 0.2s ease;
+}
+.google-btn-lg:hover {
+  background: var(--bg-paper);
+  border-color: var(--blue-300);
+  box-shadow: 0 6px 16px rgba(10, 37, 64, 0.1);
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  margin: 1.5rem 0;
+}
+.auth-divider::before, .auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.auth-divider span {
+  padding: 0 10px;
+}
+
 
 
 .preview-frame-body { padding: 20px; text-align: left; }

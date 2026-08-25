@@ -357,6 +357,10 @@ function setupGoogleAuthUI() {
   const modal = document.getElementById("google-auth-modal");
   const modalForm = document.getElementById("google-auth-form");
   const closeModalBtn = document.getElementById("close-auth-modal-btn");
+  const authGateScreen = document.getElementById("auth-gate-screen");
+  const mainWorkspace = document.getElementById("main");
+  const gateSignInBtn = document.getElementById("gate-google-signin-btn");
+  const gateForm = document.getElementById("gate-google-form");
 
   const user = getActiveUserObj();
   if (user) {
@@ -364,14 +368,48 @@ function setupGoogleAuthUI() {
     if (userProfileEl) userProfileEl.hidden = false;
     if (avatarImg) avatarImg.src = user.picture || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%230a2540'/%3E%3Ctext x='50%25' y='65%25' dominant-baseline='middle' text-anchor='middle' font-size='50' fill='white'%3E%F0%9F%90%A7%3C/text%3E%3C/svg%3E";
     if (nameSpan) nameSpan.textContent = user.name || user.email;
+    if (authGateScreen) authGateScreen.hidden = true;
+    if (mainWorkspace) mainWorkspace.hidden = false;
   } else {
     if (gSignInBtn) gSignInBtn.hidden = false;
     if (userProfileEl) userProfileEl.hidden = true;
+    if (authGateScreen) authGateScreen.hidden = false;
+    if (mainWorkspace) mainWorkspace.hidden = true;
+  }
+
+  function handleLogin(email, name) {
+    if (!email) return;
+    const slug = email.toLowerCase().replace(/[^a-z0-9]/g, "_");
+    const userObj = {
+      user_id: `g_${slug}`,
+      email: email,
+      name: name || email.split("@")[0],
+      picture: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%230a2540'/%3E%3Ctext x='50%25' y='65%25' dominant-baseline='middle' text-anchor='middle' font-size='50' fill='white'%3E%F0%9F%90%A7%3C/text%3E%3C/svg%3E",
+    };
+    localStorage.setItem("lookout_google_user", JSON.stringify(userObj));
+    if (modal) modal.close();
+    setupGoogleAuthUI();
+    loadAll();
   }
 
   if (gSignInBtn) {
     gSignInBtn.addEventListener("click", () => {
       if (modal) modal.showModal();
+    });
+  }
+
+  if (gateSignInBtn) {
+    gateSignInBtn.addEventListener("click", () => {
+      if (modal) modal.showModal();
+    });
+  }
+
+  if (gateForm) {
+    gateForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const email = document.getElementById("gate-email").value.trim();
+      const name = document.getElementById("gate-name").value.trim();
+      handleLogin(email, name);
     });
   }
 
@@ -386,19 +424,7 @@ function setupGoogleAuthUI() {
       e.preventDefault();
       const email = document.getElementById("google-email-input").value.trim();
       const name = document.getElementById("google-name-input").value.trim();
-      if (!email) return;
-
-      const slug = email.toLowerCase().replace(/[^a-z0-9]/g, "_");
-      const userObj = {
-        user_id: `g_${slug}`,
-        email: email,
-        name: name || email.split("@")[0],
-        picture: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%230a2540'/%3E%3Ctext x='50%25' y='65%25' dominant-baseline='middle' text-anchor='middle' font-size='50' fill='white'%3E%F0%9F%90%A7%3C/text%3E%3C/svg%3E",
-      };
-      localStorage.setItem("lookout_google_user", JSON.stringify(userObj));
-      if (modal) modal.close();
-      setupGoogleAuthUI();
-      loadAll();
+      handleLogin(email, name);
     });
   }
 
@@ -413,9 +439,12 @@ function setupGoogleAuthUI() {
 
 document.addEventListener("DOMContentLoaded", () => {
   setupGoogleAuthUI();
-  loadAll();
+  if (getActiveUserObj()) {
+    loadAll();
+  }
   wireRunButton();
   wireAddSiteForm();
   wireFindLocation();
 });
+
 
