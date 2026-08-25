@@ -41,7 +41,33 @@
 
   --shadow-card: 0 24px 60px -32px rgba(10, 37, 64, 0.25);
   --wrap-max: 1100px;
+
+  /* User Interviews — Research Editorial Tokens */
+  --color-deep-teal: #1c5d5f;
+  --color-pine-shadow: #0e4749;
+  --color-sage: #65b8a2;
+  --color-lake-teal: #2a7779;
+  --color-forest-floor: #156152;
+  --color-ink-navy: #16325a;
+  --color-dusty-rose: #d6aec1;
+  --color-mint-mist: #a2cbcd;
+  --color-sea-foam: #cae1e2;
+  --color-paper-white: #f2f8f7;
+  --color-card-mint: #e4f0f1;
+  --color-blush-sand: #f2e8e2;
+  --color-charcoal-navy: #283338;
+  --color-slate: #333333;
+  --color-soft-black: #1a1a1a;
+  --color-illustration-ink: #231e21;
+
+  --font-serif: 'Source Serif 4', 'Lora', serif;
+  --font-sans: 'Inter', 'Sofia Pro', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  --radius-pill: 48px;
+  --radius-full-pill: 1000px;
 }
+
 
 *, *::before, *::after { box-sizing: border-box; }
 [hidden] { display: none !important; }
@@ -683,3 +709,389 @@ button { font: inherit; }
 .feed-item .rationale { color: var(--text-secondary); font-size: 0.87rem; margin-top: 8px; }
 
 .is-updating { opacity: 0.4; pointer-events: none; }
+
+/* User Interviews — Hand-drawn Editorial Research Field Notes Theme */
+.editorial-theme {
+  background-color: var(--color-paper-white);
+  color: var(--color-slate);
+  font-family: var(--font-sans);
+}
+
+.editorial-header {
+  background: var(--color-paper-white);
+  border-bottom: 1px solid var(--color-card-mint);
+  padding: 18px 0;
+}
+
+.brand-mark-editorial {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-deep-teal);
+  display: inline-block;
+}
+
+.brand-text {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-charcoal-navy);
+}
+
+/* Pill Buttons */
+.btn-primary-pill {
+  background-color: var(--color-deep-teal) !important;
+  color: #ffffff !important;
+  border-radius: var(--radius-pill) !important;
+  font-family: var(--font-sans) !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  padding: 12px 24px !important;
+  border: none !important;
+  text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: background-color 0.2s ease, transform 0.2s ease !important;
+}
+.btn-primary-pill:hover {
+  background-color: var(--color-forest-floor) !important;
+  transform: translateY(-1px);
+}
+
+.btn-navy-pill {
+  background-color: var(--color-ink-navy) !important;
+  color: #ffffff !important;
+  border-radius: var(--radius-pill) !important;
+  font-family: var(--font-sans) !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  padding: 12px 24px !important;
+  border: none !important;
+  text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: background-color 0.2s ease, transform 0.2s ease !important;
+}
+.btn-navy-pill:hover {
+  background-color: #0d213f !important;
+  transform: translateY(-1px);
+}
+
+.btn-pill-nav {
+  color: var(--color-charcoal-navy) !important;
+  border-radius: var(--radius-full-pill) !important;
+  font-family: var(--font-sans) !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  padding: 8px 18px !important;
+  text-decoration: none !important;
+}
+
+/* Announcement Pill Banner */
+.hero-announcement-pill {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  background: var(--color-card-mint);
+  border: 1px solid var(--color-mint-mist);
+  border-radius: var(--radius-full-pill);
+  padding: 8px 20px;
+  font-size: 13px;
+  margin-bottom: 2rem;
+  color: var(--color-charcoal-navy);
+}
+.announcement-sparkle { color: var(--color-deep-teal); }
+.announcement-eyebrow {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.announcement-text { color: var(--color-slate); }
+.announcement-link {
+  color: var(--color-pine-shadow);
+  font-weight: 600;
+  text-decoration: underline;
+  margin-left: 4px;
+}
+
+/* Editorial Hero */
+.editorial-hero {
+  padding: clamp(40px, 6vw, 80px) 0;
+  text-align: center;
+}
+.hero-headline-group {
+  max-width: 820px;
+  margin: 0 auto;
+}
+.editorial-display {
+  font-family: var(--font-serif);
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  font-weight: 400;
+  line-height: 1.18;
+  color: var(--color-charcoal-navy);
+  margin-bottom: 1.2rem;
+}
+.hero-editorial-sub {
+  font-family: var(--font-sans);
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  color: var(--color-slate);
+  line-height: 1.55;
+  margin-bottom: 2.2rem;
+}
+.hero-actions-dual {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 2.5rem;
+}
+
+/* Hand-Drawn Browser Window Illustration Container */
+.hero-visual-container {
+  max-width: 760px;
+  margin: 0 auto;
+}
+.browser-frame-illustration {
+  background: #ffffff;
+  border: 2px solid var(--color-illustration-ink);
+  border-radius: 12px;
+  box-shadow: 6px 6px 0px var(--color-card-mint);
+  overflow: hidden;
+  text-align: left;
+}
+.browser-header-bar {
+  background: var(--color-card-mint);
+  border-bottom: 2px solid var(--color-illustration-ink);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.browser-window-dots {
+  display: flex;
+  gap: 6px;
+}
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-illustration-ink);
+}
+.dot-ink { background: var(--color-illustration-ink); }
+.dot-sage { background: var(--color-sage); }
+.dot-rose { background: var(--color-dusty-rose); }
+.browser-title-mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--color-charcoal-navy);
+}
+.browser-body-content {
+  padding: 24px;
+  min-height: 140px;
+  background: #ffffff;
+}
+
+/* Trust Stat Banner Strip */
+.trust-stat-strip {
+  background: #ffffff;
+  border-top: 1px solid var(--color-card-mint);
+  border-bottom: 1px solid var(--color-card-mint);
+  padding: 22px 0;
+  margin: 3rem 0;
+}
+.stat-strip-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-around;
+  gap: 16px;
+  text-align: center;
+}
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.stat-num {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  color: var(--color-deep-teal);
+}
+.stat-label {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.stat-pipe {
+  color: var(--color-mint-mist);
+  font-weight: 300;
+}
+
+/* Feature Showcase Grid */
+.editorial-showcase {
+  padding: 4rem 0;
+}
+.section-head-editorial {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 3rem;
+}
+.section-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-pine-shadow);
+  margin-bottom: 0.8rem;
+}
+.editorial-heading {
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 3.5vw, 2.8rem);
+  font-weight: 400;
+  color: var(--color-charcoal-navy);
+  line-height: 1.25;
+}
+.editorial-heading-lg {
+  font-family: var(--font-serif);
+  font-size: clamp(2.2rem, 4vw, 3.2rem);
+  font-weight: 400;
+  color: var(--color-charcoal-navy);
+  line-height: 1.2;
+}
+
+.showcase-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+}
+@media (max-width: 768px) {
+  .showcase-grid { grid-template-columns: 1fr; }
+}
+
+.feature-card-mint {
+  background: var(--color-card-mint);
+  border-radius: 12px;
+  padding: 36px 32px;
+  border: 1px solid rgba(28, 93, 95, 0.1);
+}
+.feature-card-blush {
+  background: var(--color-blush-sand);
+  border-radius: 12px;
+  padding: 36px 32px;
+  border: 1px solid rgba(214, 174, 193, 0.2);
+}
+
+.card-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--color-pine-shadow);
+  margin-bottom: 0.8rem;
+}
+.card-heading-serif {
+  font-family: var(--font-serif);
+  font-size: 1.8rem;
+  color: var(--color-charcoal-navy);
+  margin-bottom: 1rem;
+}
+.card-desc {
+  font-size: 0.98rem;
+  color: var(--color-slate);
+  line-height: 1.55;
+  margin-bottom: 1.5rem;
+}
+
+/* Custom Bold Teal Checkmark Feature List */
+.checklist-feature-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.checklist-feature-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.95rem;
+  color: var(--color-charcoal-navy);
+}
+.check-icon {
+  color: var(--color-deep-teal);
+  font-weight: 800;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+/* How It Works Editorial Grid */
+.editorial-flow-section {
+  padding: 4rem 0;
+}
+.flow-editorial-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+.flow-step-card {
+  background: #ffffff;
+  border: 1px solid var(--color-card-mint);
+  border-radius: 12px;
+  padding: 28px 22px;
+}
+.step-badge-mono {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--color-deep-teal);
+  background: var(--color-card-mint);
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-bottom: 1rem;
+}
+.flow-step-card h4 {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  color: var(--color-charcoal-navy);
+  margin-bottom: 0.6rem;
+}
+.flow-step-card p {
+  font-size: 0.9rem;
+  color: var(--color-slate);
+  line-height: 1.5;
+  margin: 0;
+}
+.step-result-card {
+  background: var(--color-card-mint);
+  border-color: var(--color-mint-mist);
+}
+
+/* Closing CTA Card */
+.editorial-closing {
+  padding: 4rem 0 6rem;
+}
+.closing-card-mint {
+  background: var(--color-card-mint);
+  border-radius: 16px;
+  padding: 60px 32px;
+  text-align: center;
+  border: 1px solid var(--color-mint-mist);
+}
+.editorial-footer {
+  background: var(--color-paper-white);
+  border-top: 1px solid var(--color-card-mint);
+}
+

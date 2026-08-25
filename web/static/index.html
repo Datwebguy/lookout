@@ -3,177 +3,192 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lookout</title>
+<title>Lookout — Autonomous Heat Safety Agent</title>
 <meta name="description" content="Lookout watches every outdoor worksite in real time and schedules the break before the heat becomes dangerous." />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/css/styles.css" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%8D%3C/text%3E%3C/svg%3E">
 </head>
-<body>
+<body class="editorial-theme">
 <a class="skip-link" href="#main">Skip to content</a>
 
-<header class="site-header">
+<!-- Site Navigation -->
+<header class="site-header editorial-header">
   <div class="wrap header-inner">
     <a class="brand" href="/">
-      <span class="brand-mark" aria-hidden="true"></span>
-      Lookout
+      <span class="brand-mark-editorial" aria-hidden="true"></span>
+      <span class="brand-text">Lookout</span>
     </a>
     <nav class="site-nav" aria-label="Primary">
-      <a href="/app" class="btn btn-primary btn-small">Open the dashboard</a>
+      <a href="/app" class="btn btn-pill-nav">Sign In</a>
+      <a href="/app" class="btn btn-primary-pill">Open Dashboard</a>
     </nav>
   </div>
 </header>
 
 <main id="main">
 
-  <section class="hero">
-    <div class="hero-glow" aria-hidden="true"></div>
+  <!-- Hero Section -->
+  <section class="editorial-hero">
     <div class="wrap hero-inner">
-      <div class="hero-copy">
-        <p class="eyebrow">Autonomous heat safety agent</p>
-        <h1>Lookout calls the break before the heat does.</h1>
-        <p class="hero-sub">
-          Lookout watches every worksite in real time and schedules the break before
-          anyone is actually at risk. Nobody has to ask.
+      <!-- AI Announcement Banner -->
+      <div class="hero-announcement-pill reveal">
+        <span class="announcement-sparkle">✦</span>
+        <span class="announcement-eyebrow">AUTONOMOUS HEAT SAFETY:</span>
+        <span class="announcement-text">Continuous microclimate surveillance built on FortyGuard data.</span>
+        <a href="/app" class="announcement-link">Explore Agent →</a>
+      </div>
+
+      <!-- Headline & Subtext -->
+      <div class="hero-headline-group reveal">
+        <h1 class="editorial-display">Lookout calls the break before the heat does.</h1>
+        <p class="hero-editorial-sub">
+          Lookout watches every outdoor worksite in real time and schedules mandatory rest breaks before anyone is at physiological risk. Nobody has to ask.
         </p>
-        <div class="hero-actions">
-          <a href="/app" class="btn btn-primary">Open the dashboard</a>
+        <div class="hero-actions-dual">
+          <a href="/app" class="btn btn-primary-pill">Open Dashboard</a>
+          <a href="/app" class="btn btn-navy-pill">Explore Safety Architecture</a>
         </div>
-        <p class="hero-meta">Real temperature data. Real reasoning. No mocked numbers.</p>
       </div>
-      <div class="hero-visual">
-        <div class="heat-motif" aria-hidden="true">
-          <svg viewBox="0 0 400 260" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
-            <defs>
-              <linearGradient id="burstGrad" x1="0" y1="1" x2="0" y2="0">
-                <stop offset="0%" stop-color="#ff7aa8"/>
-                <stop offset="100%" stop-color="#ff3d8f"/>
-              </linearGradient>
-            </defs>
-            <g class="burst">
-              <line x1="200" y1="230" x2="99.2" y2="230.0" stroke="url(#burstGrad)" stroke-width="1.24" stroke-linecap="round" opacity="0.74"/>
-              <circle cx="99.2" cy="230.0" r="1.4" fill="url(#burstGrad)" opacity="0.74"/>
-              <line x1="200" y1="230" x2="123.7" y2="220.4" stroke="url(#burstGrad)" stroke-width="1.86" stroke-linecap="round" opacity="0.57"/>
-              <circle cx="123.7" cy="220.4" r="1.67" fill="url(#burstGrad)" opacity="0.57"/>
-              <line x1="200" y1="230" x2="126.9" y2="211.2" stroke="url(#burstGrad)" stroke-width="1.81" stroke-linecap="round" opacity="0.37"/>
-              <circle cx="126.9" cy="211.2" r="1.63" fill="url(#burstGrad)" opacity="0.37"/>
-              <line x1="200" y1="230" x2="96.6" y2="189.1" stroke="url(#burstGrad)" stroke-width="1.11" stroke-linecap="round" opacity="0.4"/>
-              <circle cx="96.6" cy="189.1" r="1.4" fill="url(#burstGrad)" opacity="0.4"/>
-              <line x1="200" y1="230" x2="103.3" y2="176.8" stroke="url(#burstGrad)" stroke-width="2.32" stroke-linecap="round" opacity="0.42"/>
-              <circle cx="103.3" cy="176.8" r="2.09" fill="url(#burstGrad)" opacity="0.42"/>
-              <line x1="200" y1="230" x2="126.2" y2="176.4" stroke="url(#burstGrad)" stroke-width="2.0" stroke-linecap="round" opacity="0.92"/>
-              <circle cx="126.2" cy="176.4" r="1.8" fill="url(#burstGrad)" opacity="0.92"/>
-              <line x1="200" y1="230" x2="109.0" y2="144.6" stroke="url(#burstGrad)" stroke-width="1.63" stroke-linecap="round" opacity="0.94"/>
-              <circle cx="109.0" cy="144.6" r="1.47" fill="url(#burstGrad)" opacity="0.94"/>
-              <line x1="200" y1="230" x2="152.6" y2="172.7" stroke="url(#burstGrad)" stroke-width="2.37" stroke-linecap="round" opacity="0.52"/>
-              <circle cx="152.6" cy="172.7" r="2.13" fill="url(#burstGrad)" opacity="0.52"/>
-              <line x1="200" y1="230" x2="155.1" y2="159.3" stroke="url(#burstGrad)" stroke-width="1.19" stroke-linecap="round" opacity="0.54"/>
-              <circle cx="155.1" cy="159.3" r="1.4" fill="url(#burstGrad)" opacity="0.54"/>
-              <line x1="200" y1="230" x2="137.2" y2="96.5" stroke="url(#burstGrad)" stroke-width="1.29" stroke-linecap="round" opacity="0.7"/>
-              <circle cx="137.2" cy="96.5" r="1.4" fill="url(#burstGrad)" opacity="0.7"/>
-              <line x1="200" y1="230" x2="159.6" y2="105.7" stroke="url(#burstGrad)" stroke-width="1.6" stroke-linecap="round" opacity="0.68"/>
-              <circle cx="159.6" cy="105.7" r="1.44" fill="url(#burstGrad)" opacity="0.68"/>
-              <line x1="200" y1="230" x2="185.8" y2="155.4" stroke="url(#burstGrad)" stroke-width="1.1" stroke-linecap="round" opacity="0.47"/>
-              <circle cx="185.8" cy="155.4" r="1.4" fill="url(#burstGrad)" opacity="0.47"/>
-              <line x1="200" y1="230" x2="191.5" y2="95.6" stroke="url(#burstGrad)" stroke-width="1.68" stroke-linecap="round" opacity="0.54"/>
-              <circle cx="191.5" cy="95.6" r="1.51" fill="url(#burstGrad)" opacity="0.54"/>
-              <line x1="200" y1="230" x2="207.9" y2="104.6" stroke="url(#burstGrad)" stroke-width="1.73" stroke-linecap="round" opacity="0.53"/>
-              <circle cx="207.9" cy="104.6" r="1.56" fill="url(#burstGrad)" opacity="0.53"/>
-              <line x1="200" y1="230" x2="227.3" y2="87.1" stroke="url(#burstGrad)" stroke-width="2.12" stroke-linecap="round" opacity="0.5"/>
-              <circle cx="227.3" cy="87.1" r="1.91" fill="url(#burstGrad)" opacity="0.5"/>
-              <line x1="200" y1="230" x2="238.5" y2="111.5" stroke="url(#burstGrad)" stroke-width="1.84" stroke-linecap="round" opacity="0.88"/>
-              <circle cx="238.5" cy="111.5" r="1.66" fill="url(#burstGrad)" opacity="0.88"/>
-              <line x1="200" y1="230" x2="259.3" y2="104.0" stroke="url(#burstGrad)" stroke-width="1.46" stroke-linecap="round" opacity="0.94"/>
-              <circle cx="259.3" cy="104.0" r="1.4" fill="url(#burstGrad)" opacity="0.94"/>
-              <line x1="200" y1="230" x2="243.5" y2="161.4" stroke="url(#burstGrad)" stroke-width="1.67" stroke-linecap="round" opacity="0.8"/>
-              <circle cx="243.5" cy="161.4" r="1.5" fill="url(#burstGrad)" opacity="0.8"/>
-              <line x1="200" y1="230" x2="253.8" y2="164.9" stroke="url(#burstGrad)" stroke-width="1.78" stroke-linecap="round" opacity="0.37"/>
-              <circle cx="253.8" cy="164.9" r="1.6" fill="url(#burstGrad)" opacity="0.37"/>
-              <line x1="200" y1="230" x2="297.3" y2="138.6" stroke="url(#burstGrad)" stroke-width="2.22" stroke-linecap="round" opacity="0.69"/>
-              <circle cx="297.3" cy="138.6" r="2.0" fill="url(#burstGrad)" opacity="0.69"/>
-              <line x1="200" y1="230" x2="323.9" y2="140.0" stroke="url(#burstGrad)" stroke-width="1.5" stroke-linecap="round" opacity="0.77"/>
-              <circle cx="323.9" cy="140.0" r="1.4" fill="url(#burstGrad)" opacity="0.77"/>
-              <line x1="200" y1="230" x2="310.8" y2="169.1" stroke="url(#burstGrad)" stroke-width="1.93" stroke-linecap="round" opacity="0.62"/>
-              <circle cx="310.8" cy="169.1" r="1.74" fill="url(#burstGrad)" opacity="0.62"/>
-              <line x1="200" y1="230" x2="339.3" y2="174.9" stroke="url(#burstGrad)" stroke-width="2.51" stroke-linecap="round" opacity="0.63"/>
-              <circle cx="339.3" cy="174.9" r="2.26" fill="url(#burstGrad)" opacity="0.63"/>
-              <line x1="200" y1="230" x2="328.9" y2="196.9" stroke="url(#burstGrad)" stroke-width="1.1" stroke-linecap="round" opacity="0.77"/>
-              <circle cx="328.9" cy="196.9" r="1.4" fill="url(#burstGrad)" opacity="0.77"/>
-              <line x1="200" y1="230" x2="330.4" y2="213.5" stroke="url(#burstGrad)" stroke-width="2.59" stroke-linecap="round" opacity="0.84"/>
-              <circle cx="330.4" cy="213.5" r="2.33" fill="url(#burstGrad)" opacity="0.84"/>
-              <line x1="200" y1="230" x2="297.0" y2="230.0" stroke="url(#burstGrad)" stroke-width="1.62" stroke-linecap="round" opacity="0.75"/>
-              <circle cx="297.0" cy="230.0" r="1.46" fill="url(#burstGrad)" opacity="0.75"/>
-            </g>
-          </svg>
-        </div>
-        <div class="preview-frame" id="hero-preview">
-          <div class="preview-frame-bar">
-            <span class="preview-frame-dot" aria-hidden="true"></span>
-            <span class="preview-frame-dot" aria-hidden="true"></span>
-            <span class="preview-frame-dot" aria-hidden="true"></span>
-            <span class="preview-frame-label">Live from Lookout</span>
+
+      <!-- Hand-Drawn Hero Frame Preview -->
+      <div class="hero-visual-container reveal">
+        <div class="browser-frame-illustration">
+          <div class="browser-header-bar">
+            <div class="browser-window-dots">
+              <span class="dot dot-ink"></span>
+              <span class="dot dot-sage"></span>
+              <span class="dot dot-rose"></span>
+            </div>
+            <span class="browser-title-mono">● LIVE DECISION SURVEILLANCE — WORKSPACE STREAM</span>
           </div>
-          <div class="preview-frame-body" id="hero-preview-body">
-            <p class="live-loading">Loading a real decision.</p>
+          <div class="browser-body-content" id="hero-preview-body">
+            <div class="live-loading-state">
+              <div class="spinner-ink"></div>
+              <p>Fetching real microclimate decision stream...</p>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="section how">
+  <!-- Trust Stat Banner Strip -->
+  <section class="trust-stat-strip">
+    <div class="wrap stat-strip-inner">
+      <div class="stat-item">
+        <span class="stat-num">FORTYGUARD REAL-TIME</span>
+        <span class="stat-label">Microclimate Thermal Inputs</span>
+      </div>
+      <span class="stat-pipe">|</span>
+      <div class="stat-item">
+        <span class="stat-num">1-HOUR PREDICTIVE HORIZON</span>
+        <span class="stat-label">Continuous Safety Surveillance</span>
+      </div>
+      <span class="stat-pipe">|</span>
+      <div class="stat-item">
+        <span class="stat-num">100% WORKER-SCOPED</span>
+        <span class="stat-label">Role & Physiological Adaptation</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Two-Column Showcase Section -->
+  <section class="section editorial-showcase">
     <div class="wrap">
-      <div class="section-head reveal">
-        <p class="eyebrow">How it works</p>
-        <h2>Three real signals. One decision.</h2>
+      <div class="section-head-editorial reveal">
+        <p class="section-eyebrow">● ARCHITECTURE | MULTI-SIGNAL REASONING</p>
+        <h2 class="editorial-heading">Built like a research journal, powered by real thermal data.</h2>
       </div>
-      <div class="flow reveal">
-        <div class="flow-inputs">
-          <div class="flow-node">
-            <span class="step-num" aria-hidden="true">1</span>
-            <h3>Now and ahead</h3>
-            <p>The real temperature at this exact worksite, plus what is likely coming next.</p>
-          </div>
-          <div class="flow-node">
-            <span class="step-num" aria-hidden="true">2</span>
-            <h3>How long</h3>
-            <p>How many hours this site has spent past a danger threshold, not just how hot it is right now.</p>
-          </div>
-          <div class="flow-node">
-            <span class="step-num" aria-hidden="true">3</span>
-            <h3>This worker</h3>
-            <p>Role, shift, and health flags, so the same weather can mean a different decision.</p>
-          </div>
+
+      <div class="showcase-grid reveal">
+        <!-- Card 1: Mint Card -->
+        <article class="feature-card-mint">
+          <p class="card-eyebrow">● SIGNAL PROCESSING | NOW & AHEAD</p>
+          <h3 class="card-heading-serif">Hyperlocal Microclimate Surveillance</h3>
+          <p class="card-desc">Lookout connects to FortyGuard high-resolution thermal feeds at the exact site coordinates, evaluating localized heat buildup rather than regional weather approximations.</p>
+          <ul class="checklist-feature-list">
+            <li><span class="check-icon">✓</span> Real-time ground & air temperature telemetry</li>
+            <li><span class="check-icon">✓</span> 1-hour forward predictive temperature trajectory</li>
+            <li><span class="check-icon">✓</span> Threshold duration tracking past safety limits</li>
+          </ul>
+        </article>
+
+        <!-- Card 2: Blush Card -->
+        <article class="feature-card-blush">
+          <p class="card-eyebrow">● WORKFORCE ADAPTATION | INDIVIDUAL RISK</p>
+          <h3 class="card-heading-serif">Worker-Specific Safety Protocols</h3>
+          <p class="card-desc">The same temperature reading demands different safety protocols for a roof worker on an 8-hour shift versus a shaded supervisor. Lookout customizes every recommendation.</p>
+          <ul class="checklist-feature-list">
+            <li><span class="check-icon">✓</span> Account for shift duration and direct sun exposure</li>
+            <li><span class="check-icon">✓</span> Factor worker health risk flags & PPE requirements</li>
+            <li><span class="check-icon">✓</span> Autonomous webhooks sent directly to Slack & Discord</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section class="section editorial-flow-section">
+    <div class="wrap">
+      <div class="section-head-editorial reveal">
+        <p class="section-eyebrow">● OPERATIONAL WORKFLOW | THREE SIGNALS, ONE DECISION</p>
+        <h2 class="editorial-heading">How Lookout decides safety in real time.</h2>
+      </div>
+
+      <div class="flow-editorial-grid reveal">
+        <div class="flow-step-card">
+          <span class="step-badge-mono">01</span>
+          <h4>Temperature Telemetry</h4>
+          <p>Scans real-time temperature and 1-hour forecasts at exact site GPS coordinates.</p>
         </div>
-        <div class="flow-connector" aria-hidden="true"></div>
-        <div class="flow-arrowhead" aria-hidden="true"></div>
-        <div class="flow-node flow-node-result">
-          <span class="step-num" aria-hidden="true">4</span>
-          <h3>One decision</h3>
-          <p>Risk level, the action to take, timing, and why, made for this worker.</p>
+        <div class="flow-step-card">
+          <span class="step-badge-mono">02</span>
+          <h4>Durationpast Threshold</h4>
+          <p>Calculates cumulative hours spent past danger thresholds to measure heat stress accumulators.</p>
+        </div>
+        <div class="flow-step-card">
+          <span class="step-badge-mono">03</span>
+          <h4>Worker Context</h4>
+          <p>Evaluates role, shift length, and health risk flags to tailor rest break durations.</p>
+        </div>
+        <div class="flow-step-card step-result-card">
+          <span class="step-badge-mono">04</span>
+          <h4>Autonomous Action</h4>
+          <p>Issues clear risk tiers, specific break timing, and rationale directly to supervisors.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="section closing">
+  <!-- Closing CTA Section -->
+  <section class="section editorial-closing">
     <div class="wrap reveal">
-      <h2>See it decide, live.</h2>
-      <p class="hero-sub" style="margin-left:auto;margin-right:auto;">Every number on the dashboard is a real call, made right now.</p>
-      <a href="/app" class="btn btn-primary">Open the dashboard</a>
+      <div class="closing-card-mint">
+        <p class="section-eyebrow">● DEMO & PRODUCTION READY</p>
+        <h2 class="editorial-heading-lg">See Lookout decide, live.</h2>
+        <p class="hero-editorial-sub" style="margin: 0.8rem auto 1.8rem; max-width: 600px;">
+          Every decision on the dashboard is calculated from real FortyGuard microclimate data with zero mocked numbers.
+        </p>
+        <div class="hero-actions-dual" style="justify-content: center;">
+          <a href="/app" class="btn btn-primary-pill">Open Dashboard</a>
+        </div>
+      </div>
     </div>
   </section>
 
 </main>
 
-<footer class="site-footer">
+<footer class="site-footer editorial-footer">
   <div class="wrap footer-inner">
-    <span>Lookout. Built on FortyGuard.</span>
-    <span>Real data only.</span>
+    <span>Lookout Heat Safety Agent · Powered by FortyGuard</span>
+    <span>Real-time microclimate intelligence</span>
   </div>
 </footer>
+
 <script src="/static/js/landing.js"></script>
 </body>
 </html>
