@@ -1,81 +1,119 @@
-# 🔍 Lookout — Autonomous Microclimate Heat Safety Agent
+# 🔍 Lookout: Autonomous Microclimate Heat Safety Agent
 
-> **Live Production Platform:** [lookoutapp.fly.dev](https://lookoutapp.fly.dev)  
-> **Interactive Dashboard:** [lookoutapp.fly.dev/app](https://lookoutapp.fly.dev/app)  
-> **Author & Project Lead:** [@Datweb3guy](https://x.com/Datweb3guy)  
-> **Built on:** FortyGuard Real-Time Thermal Intelligence API & FastAPI
-
----
-
-## 🌟 Overview
-
-**Lookout** is an autonomous heat safety agent designed for managers and supervisors of outdoor workforces (construction, logistics, agriculture, utilities, and municipal public works). Instead of relying on regional weather forecasts, Lookout continuously monitors microclimate heat levels at exact GPS worksite coordinates using real-time [FortyGuard API](https://docs.fortyguard.com) thermal telemetry.
-
-Lookout automatically computes **personalized, worker-scoped safety decisions**:
-- **Microclimate Thermal Telemetry:** Evaluates real-time air/ground temperatures and 1-hour forward forecasts.
-- **Threshold Exceedance Duration:** Tracks cumulative hours spent above safety limits rather than peak snapshots alone.
-- **Worker Risk Profiles:** Tailors recommendations based on shift duration, direct sun exposure, PPE requirements, and health risk flags.
-- **Autonomous Dispatch:** Sends automated safety alerts directly to Slack and Discord webhooks without human intervention.
-- **Multi-Tenant Isolation & Security:** Scoped by Google Authentication (`GOOGLE_CLIENT_ID`) with multi-tenant workspace data isolation and strict PHI/PII sanitization.
+* **Live Production Platform:** https://lookoutapp.fly.dev
+* **Interactive Operations Dashboard:** https://lookoutapp.fly.dev/app
+* **GitHub Repository:** https://github.com/Datwebguy/lookout
+* **Hackathon Collaborator Handle:** Hackathon:FG
+* **Project Lead:** @Datweb3guy (https://x.com/Datweb3guy)
+* **Core Technology:** FortyGuard Real Time Thermal Intelligence API, FastAPI, OpenAI GPT:4o
 
 ---
 
-## 🚀 Key Features
+## 🌟 Executive Summary
 
-1. **Google OAuth 2.0 Identity & Gate Screen:**
-   - Secure authentication via official Google Identity Services (GIS).
-   - Private workspace data isolation — each manager sees only their registered sites and decision log.
+Lookout is an autonomous heat safety agent designed for outdoor workforce managers across construction, logistics, agriculture, utilities, and municipal public works. Regional weather apps provide single citywide numbers that fail to capture dangerous localized microclimates. Lookout continuously monitors hyper-local heat stress at exact worksite GPS coordinates using FortyGuard thermal API telemetry.
 
-2. **Autonomous Background Safety Loop:**
-   - A real background thread continuously polls registered sites on an active interval.
-   - Triggers automated alerts to Slack & Discord webhooks whenever heat stress risks escalate.
-
-3. **PHI / PII Sanitization:**
-   - LLM safety reasoning strictly outputs standardized risk tiers (`LOW`, `MODERATE`, `HIGH`, `EXTREME`) and operational safety phrasing, preventing sensitive worker health information from leaking.
-
-4. **Address Lookup & Microclimate Geocoding:**
-   - Interactive OpenStreetMap Nominatim geocoding translates street addresses to exact GPS coordinates (`lat`/`lon`).
-
-5. **Editorial Warm Research Design System:**
-   - Built on a warm paper canvas (`#f2f8f7`) with literary serif headlines (`Source Serif 4`), geometric sans body (`Inter`), IBM Plex Mono uppercase eyebrows, and deep teal (`#1c5d5f`) pill CTAs.
+Lookout calculates personalized worker safety decisions without requiring human prompts:
+* **Hyperlocal Thermal Telemetry:** Evaluates real time ground and air microclimate temperatures.
+* **Duration Exceedance Analysis:** Calculates cumulative hours spent above dangerous heat thresholds rather than relying on snapshot peaks.
+* **Worker Scoped Personalization:** Tailors safety actions based on shift length, sun exposure, heavy PPE gear, and health risk profiles.
+* **Autonomous Proactive Alerting:** Automatically schedules rest breaks and dispatches webhooks to Slack and Discord before dangerous heat thresholds are crossed.
+* **Multi Tenant Isolation and Security:** Authenticated via official Google OAuth 2.0 with private workspace data isolation and strict PHI PII health data sanitization.
 
 ---
 
-## 🛠️ Architecture & Tech Stack
+## 🏛️ System Architecture
 
-- **Backend:** FastAPI (Python 3.11), Uvicorn, Python `threading` background loops, `google-auth`.
-- **Telemetry & LLM Reasoning:** FortyGuard API Client (`fortyguard/`), OpenAI GPT-4o safety agent (`lookout/agent.py`).
-- **Frontend:** Vanilla JS (`web/static/js/app.js`), HTML5, CSS3 with User Interviews editorial tokens (`web/static/css/styles.css`).
-- **Deployment:** Fly.io container deployment (`lookoutapp.fly.dev`), Depot Docker builder.
+```
+                  ┌────────────────────────────────┐
+                  │   Autonomous Scheduler Loop    │  Runs continuously in background
+                  │   Iterates Registered Sites    │  No human prompt required
+                  └────────────────┬───────────────┘
+                                   │
+                                   ▼
+   ┌───────────────┐    ┌────────────────────────┐    ┌──────────────────────┐
+   │  FortyGuard   │───▶│  Agent Reasoning Engine│───▶│  Safety Decision     │
+   │  API Client   │    │  LLM tool use & signals│    │  Risk tier & action  │
+   └───────────────┘    └────────────┬───────────┘    └──────────┬───────────┘
+                                     │                           │
+                                     ▼                           ▼
+                           ┌──────────────────┐        ┌────────────────────┐
+                           │ Webhook Dispatch │        │ Audit Decision Log │
+                           │ Slack & Discord  │        │ Persisted evidence │
+                           └──────────────────┘        └────────────────────┘
+```
+
+The system architecture combines real time telemetry with autonomous background execution:
+* **FortyGuard SDK Client:** Executes polygon heatmap calls (`POST /v1/heatmap`) and area weights tile data over exact worksite geometries.
+* **Autonomous Scheduler:** Executes per-site checks on an active background loop without manual intervention.
+* **Reasoning Engine:** Evaluates microclimate telemetry, exceedance duration, and worker risk profiles through structured outputs.
+* **Proactive Action Engine:** Detects upcoming threshold crossings using historical analog signals and pre-schedules rest break windows.
+* **Multi Channel Alerting:** Dispatches immediate alert notifications to configured Slack and Discord webhooks.
 
 ---
 
-## 💻 Local Setup & Development
+## 🚀 Key Feature Suite
 
-### 1. Clone & Setup Virtual Environment
+### 1. Google OAuth 2.0 Identity & Workspace Isolation
+* Authenticates users via official Google Identity Services (GIS).
+* Enforces workspace isolation so supervisors only see their own registered worksites and decision logs.
+
+### 2. Autonomous Proactive Protection
+* Background threads evaluate all active worksites on regular intervals.
+* Pre-schedules mandatory hydration and rest breaks ending exactly when peak heat is projected to hit.
+
+### 3. PHI and PII Health Data Protection
+* Medical risk factors remain strictly inside sanitized backend reasoning loops.
+* System outputs standardized operational safety tiers (LOW, MODERATE, HIGH, EXTREME) to keep sensitive health records private.
+
+### 4. Interactive Nominatim Address Geocoding
+* Translates physical street addresses into accurate GPS coordinates automatically via OpenStreetMap Nominatim.
+
+### 5. Editorial Warm Research Design System
+* Styled on an off-white paper canvas (`#f2f8f7`) featuring Source Serif display typography, Inter body sans, IBM Plex Mono eyebrows, and deep teal (`#1c5d5f`) pill controls.
+
+---
+
+## 🛠️ Tech Stack
+
+* **Backend Framework:** Python 3.11, FastAPI, Uvicorn, Python Threading.
+* **AI Engine & Telemetry:** FortyGuard API Client (`fortyguard/`), OpenAI GPT:4o.
+* **Frontend UI:** HTML5, CSS3 Editorial Design System, Vanilla JavaScript (`web/static/js/app.js`).
+* **Cloud Infrastructure:** Fly.io Container Deployment, Depot Docker Builder.
+
+---
+
+## 💻 Local Setup & Installation
+
+### Step 1: Clone Repository
 ```bash
 git clone https://github.com/Datwebguy/lookout.git
 cd lookout
+```
 
+### Step 2: Create Virtual Environment
+```bash
 python -m venv venv
-# Windows:
+
+# Windows
 venv\Scripts\activate
-# macOS / Linux:
+
+# macOS or Linux
 source venv/bin/activate
 ```
 
-### 2. Install Dependencies
+### Step 3: Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Environment Configuration
+### Step 4: Configure Environment Credentials
 Copy `.env.example` to `.env`:
 ```bash
 cp .env.example .env
 ```
 
-Fill in your environment variables:
+Set your configuration variables inside `.env`:
 ```env
 FORTYGUARD_API_KEY=your_fortyguard_api_key
 OPENAI_API_KEY=your_openai_api_key
@@ -83,34 +121,58 @@ GOOGLE_CLIENT_ID=239352907733-6pkm260rhpf8h3hb0sdif7e4dschl8dj.apps.googleuserco
 SLACK_WEBHOOK_URL=your_slack_webhook_url
 ```
 
-### 4. Run the Development Web Server
+### Step 5: Start Local Web Server
 ```bash
 uvicorn web.server:app --host 127.0.0.1 --port 8001 --reload
 ```
-Open [http://127.0.0.1:8001](http://127.0.0.1:8001) in your browser!
+Navigate to http://127.0.0.1:8001 in your web browser.
 
 ---
 
-## 📚 FortyGuard API & SDK Reference
+## 🔬 Automated Verification & Test Scripts
 
-The project includes the complete `fortyguard/` SDK package and `notebooks/` walkthroughs for FortyGuard's analysis endpoints:
-- `POST /v1/heatmap` — Polygon thermal heatmaps & exceedance analysis.
-- `POST /v1/env_params` — Environmental parameters (apparent temp, heat index, AQI, solar radiation).
-- `POST /v1/satellite` — Satellite land-cover segmentation.
-- `POST /v1/streetview` — Ground-level view segmentation.
-- `POST /v1/heat_intelligence` — Heat intelligence PDF report generation.
+Run the internal proof suite to verify real API integration:
 
-See [`notebooks/use_cases/README.md`](notebooks/use_cases/README.md) for full narrative notebook workflows.
+```bash
+# Verify FortyGuard Live API Round Trip
+python scripts/milestone1_live_proof.py
+
+# Verify Signals Layer & Area Weighted Exceedance
+python scripts/milestone2_signals_proof.py
+
+# Verify Autonomous Scheduler & Cache
+python scripts/milestone3_scheduler_proof.py
+
+# Verify Agent Reasoning & Personalization
+python scripts/milestone4_agent_proof.py
+
+# Verify Proactive Action & Decision Logging
+python scripts/milestone5_proactive_proof.py
+
+# Verify Webhook Notification Delivery
+python scripts/milestone6_notify_proof.py
+```
 
 ---
 
-## 🌐 Live Production & Links
+## 📚 FortyGuard API Integration Reference
 
-- **Live Application:** [https://lookoutapp.fly.dev](https://lookoutapp.fly.dev)
-- **Live Dashboard:** [https://lookoutapp.fly.dev/app](https://lookoutapp.fly.dev/app)
-- **FortyGuard Documentation:** [https://docs.fortyguard.com](https://docs.fortyguard.com)
-- **GitHub Repository:** [https://github.com/Datwebguy/lookout](https://github.com/Datwebguy/lookout)
-- **Author X Profile:** [@Datweb3guy](https://x.com/Datweb3guy)
+Lookout leverages FortyGuard's core endpoints:
+* `POST /v1/heatmap`: Retrieves thermal tiles and calculates exceedance duration over worksite polygons.
+* `POST /v1/env_params`: Fetches apparent temperature, humidity, and solar radiation index.
+* `POST /v1/satellite`: Performs land cover segmentation for surface urban heat island analysis.
+* `POST /v1/streetview`: Analyzes ground level shading and canopy coverage.
+* `POST /v1/heat_intelligence`: Generates structured PDF heat intelligence briefs.
 
 ---
+
+## 🏆 Hackathon Alignment & Submission Details
+
+* **Primary Track:** Track 06 Agentic AI (Autonomous execution, tool calling, proactive decision making without human prompting).
+* **Secondary Categories:** Cities (Track 01) and Government (Track 04).
+* **GitHub Repository Access:** Added `Hackathon:FG` as collaborator.
+* **Credentials Security:** Secrets and API keys are stored exclusively in server side environment variables and `.env` (git ignored).
+
+---
+
 © 2026 Lookout. Built on FortyGuard API.
