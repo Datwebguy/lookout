@@ -402,7 +402,11 @@ async function setupGoogleAuthUI() {
       clientId = cfg.google_client_id || "";
     } catch (e) {}
 
-    if (clientId && window.google && google.accounts && google.accounts.id) {
+    if (!clientId) {
+      clientId = "239352907733-6pkm260rhpf8h3hb0sdif7e4dschl8dj.apps.googleusercontent.com";
+    }
+
+    if (window.google && google.accounts && google.accounts.id) {
       if (statusMsg) statusMsg.textContent = "";
       google.accounts.id.initialize({
         client_id: clientId,
@@ -420,34 +424,8 @@ async function setupGoogleAuthUI() {
         });
       }
       google.accounts.id.prompt();
-    } else {
-      if (statusMsg) {
-        statusMsg.className = "form-status";
-        statusMsg.innerHTML = `
-          <strong>Google OAuth Client ID required for official Sign-In with Google.</strong><br>
-          Add <code>GOOGLE_CLIENT_ID</code> to your <code>.env</code> file or Fly secrets.<br><br>
-          <a href="#" id="dev-quick-login" style="color: var(--blue-400); text-decoration: underline; font-weight: 600;">Click here to sign in with your Google Account email</a>
-        `;
-        setTimeout(() => {
-          const quickBtn = document.getElementById("dev-quick-login");
-          if (quickBtn) {
-            quickBtn.addEventListener("click", (e) => {
-              e.preventDefault();
-              const email = prompt("Enter your Google Account email address:", "user@gmail.com");
-              if (email && email.trim()) {
-                const cleanEmail = email.trim();
-                handleGoogleUser({
-                  user_id: "g_" + cleanEmail.toLowerCase().replace(/[^a-z0-9]/g, "_"),
-                  email: cleanEmail,
-                  name: cleanEmail.split("@")[0],
-                  picture: "",
-                });
-              }
-            });
-          }
-        }, 100);
-      }
     }
+
   }
 
   if (signoutBtn) {
