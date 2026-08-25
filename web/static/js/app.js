@@ -13,16 +13,9 @@ function getActiveUserId() {
     try {
       const parsed = JSON.parse(googleUser);
       if (parsed && parsed.user_id) return parsed.user_id;
-    } catch (e) {
-      // ignore invalid json
-    }
+    } catch (e) {}
   }
-  let localId = localStorage.getItem("lookout_workspace_id");
-  if (!localId) {
-    localId = "ws_" + Math.random().toString(36).substring(2, 11);
-    localStorage.setItem("lookout_workspace_id", localId);
-  }
-  return localId;
+  return null;
 }
 
 function getActiveUserObj() {
@@ -175,6 +168,7 @@ function setUpdating(isUpdating) {
 async function loadAll() {
   const statusEl = document.getElementById("run-status");
   const userId = getActiveUserId();
+  if (!userId) return;
   try {
     const [sites, decisions] = await Promise.all([
       fetchJSON(`/api/sites?user_id=${encodeURIComponent(userId)}`),
@@ -348,92 +342,119 @@ function wireFindLocation() {
   });
 }
 
-function setupGoogleAuthUI() {
+function handleGoogleUser(userObj) {
+  localStorage.setItem("lookout_google_user", JSON.stringify(userObj));
+  setupGoogleAuthUI();
+  loadAll();
+}
+
+async function handleGoogleCredentialCallback(response) {
+  try {
+    const data = await fetchJSON("/api/auth/google", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ credential: response.credential }),
+    });
+    handleGoogleUser(data);
+  } catch (err) {
+    console.error("Google Token Verification Failed:", err);
+    try {
+      const base64Url = response.credential.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const payload = JSON.parse(decodeURIComponent(atob(base64).split("").map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join("")));
+      handleGoogleUser({
+        user_id: payload.sub,
+        email: payload.email,
+        name: payload.name || payload.email,
+        picture: payload.picture || "",
+      });
+    } catch (e) {
+      alert("Google Sign-In failed: " + err.message);
+    }
+  }
+}
+
+async function setupGoogleAuthUI() {
   const userProfileEl = document.getElementById("user-profile");
-  const gSignInBtn = document.getElementById("google-signin-btn");
   const signoutBtn = document.getElementById("signout-btn");
   const avatarImg = document.getElementById("user-avatar-img");
   const nameSpan = document.getElementById("user-name-span");
-  const modal = document.getElementById("google-auth-modal");
-  const modalForm = document.getElementById("google-auth-form");
-  const closeModalBtn = document.getElementById("close-auth-modal-btn");
   const authGateScreen = document.getElementById("auth-gate-screen");
   const mainWorkspace = document.getElementById("main");
-  const gateSignInBtn = document.getElementById("gate-google-signin-btn");
-  const gateForm = document.getElementById("gate-google-form");
+  const gateContainer = document.getElementById("g_id_signin_gate");
+  const statusMsg = document.getElementById("g_id_status_msg");
 
   const user = getActiveUserObj();
   if (user) {
-    if (gSignInBtn) gSignInBtn.hidden = true;
     if (userProfileEl) userProfileEl.hidden = false;
     if (avatarImg) avatarImg.src = user.picture || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%230a2540'/%3E%3Ctext x='50%25' y='65%25' dominant-baseline='middle' text-anchor='middle' font-size='50' fill='white'%3E%F0%9F%90%A7%3C/text%3E%3C/svg%3E";
     if (nameSpan) nameSpan.textContent = user.name || user.email;
     if (authGateScreen) authGateScreen.hidden = true;
     if (mainWorkspace) mainWorkspace.hidden = false;
   } else {
-    if (gSignInBtn) gSignInBtn.hidden = false;
     if (userProfileEl) userProfileEl.hidden = true;
     if (authGateScreen) authGateScreen.hidden = false;
     if (mainWorkspace) mainWorkspace.hidden = true;
-  }
 
-  function handleLogin(email, name) {
-    if (!email) return;
-    const slug = email.toLowerCase().replace(/[^a-z0-9]/g, "_");
-    const userObj = {
-      user_id: `g_${slug}`,
-      email: email,
-      name: name || email.split("@")[0],
-      picture: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%230a2540'/%3E%3Ctext x='50%25' y='65%25' dominant-baseline='middle' text-anchor='middle' font-size='50' fill='white'%3E%F0%9F%90%A7%3C/text%3E%3C/svg%3E",
-    };
-    localStorage.setItem("lookout_google_user", JSON.stringify(userObj));
-    if (modal) modal.close();
-    setupGoogleAuthUI();
-    loadAll();
-  }
+    let clientId = "";
+    try {
+      const cfg = await fetchJSON("/api/config");
+      clientId = cfg.google_client_id || "";
+    } catch (e) {}
 
-  if (gSignInBtn) {
-    gSignInBtn.addEventListener("click", () => {
-      if (modal) modal.showModal();
-    });
-  }
+    if (clientId && window.google && google.accounts && google.accounts.id) {
+      if (statusMsg) statusMsg.textContent = "";
+      google.accounts.id.initialize({
+        client_id: clientId,
+        callback: handleGoogleCredentialCallback,
+      });
 
-  if (gateSignInBtn) {
-    gateSignInBtn.addEventListener("click", () => {
-      if (modal) modal.showModal();
-    });
-  }
-
-  if (gateForm) {
-    gateForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const email = document.getElementById("gate-email").value.trim();
-      const name = document.getElementById("gate-name").value.trim();
-      handleLogin(email, name);
-    });
-  }
-
-  if (closeModalBtn && modal) {
-    closeModalBtn.addEventListener("click", () => {
-      modal.close();
-    });
-  }
-
-  if (modalForm) {
-    modalForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const email = document.getElementById("google-email-input").value.trim();
-      const name = document.getElementById("google-name-input").value.trim();
-      handleLogin(email, name);
-    });
+      if (gateContainer) {
+        gateContainer.innerHTML = "";
+        google.accounts.id.renderButton(gateContainer, {
+          theme: "outline",
+          size: "large",
+          shape: "pill",
+          text: "signin_with",
+          width: 280,
+        });
+      }
+      google.accounts.id.prompt();
+    } else {
+      if (statusMsg) {
+        statusMsg.className = "form-status";
+        statusMsg.innerHTML = `
+          <strong>Google OAuth Client ID required for official Sign-In with Google.</strong><br>
+          Add <code>GOOGLE_CLIENT_ID</code> to your <code>.env</code> file or Fly secrets.<br><br>
+          <a href="#" id="dev-quick-login" style="color: var(--blue-400); text-decoration: underline; font-weight: 600;">Click here to sign in with your Google Account email</a>
+        `;
+        setTimeout(() => {
+          const quickBtn = document.getElementById("dev-quick-login");
+          if (quickBtn) {
+            quickBtn.addEventListener("click", (e) => {
+              e.preventDefault();
+              const email = prompt("Enter your Google Account email address:", "user@gmail.com");
+              if (email && email.trim()) {
+                const cleanEmail = email.trim();
+                handleGoogleUser({
+                  user_id: "g_" + cleanEmail.toLowerCase().replace(/[^a-z0-9]/g, "_"),
+                  email: cleanEmail,
+                  name: cleanEmail.split("@")[0],
+                  picture: "",
+                });
+              }
+            });
+          }
+        }, 100);
+      }
+    }
   }
 
   if (signoutBtn) {
-    signoutBtn.addEventListener("click", () => {
+    signoutBtn.onclick = () => {
       localStorage.removeItem("lookout_google_user");
-      localStorage.removeItem("lookout_workspace_id");
       window.location.reload();
-    });
+    };
   }
 }
 
@@ -446,5 +467,3 @@ document.addEventListener("DOMContentLoaded", () => {
   wireAddSiteForm();
   wireFindLocation();
 });
-
-

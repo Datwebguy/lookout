@@ -61,8 +61,16 @@ app.add_middleware(
 )
 
 
+@app.get("/api/config")
+def get_config() -> dict:
+    return {
+        "google_client_id": os.environ.get("GOOGLE_CLIENT_ID", ""),
+    }
+
+
 class GoogleAuthToken(BaseModel):
     credential: str
+
 
 
 @app.post("/api/auth/google")
@@ -73,7 +81,8 @@ def verify_google_token(payload: GoogleAuthToken) -> dict:
         raise HTTPException(status_code=400, detail="Token is required")
     try:
         req = google_requests.Request()
-        id_info = id_token.verify_oauth2_token(token, req)
+        client_id = os.environ.get("GOOGLE_CLIENT_ID")
+        id_info = id_token.verify_oauth2_token(token, req, audience=client_id) if client_id else id_token.verify_oauth2_token(token, req)
         return {
             "user_id": id_info.get("sub"),
             "email": id_info.get("email"),
@@ -82,6 +91,7 @@ def verify_google_token(payload: GoogleAuthToken) -> dict:
         }
     except Exception as exc:
         raise HTTPException(status_code=401, detail=f"Invalid Google ID token: {exc}") from exc
+
 
 
 @app.get("/api/geocode")
