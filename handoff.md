@@ -5,10 +5,10 @@
 ---
 
 ## Current status
-- **Phase / milestone:** Milestones 1-7 complete on real data, plus a minimal self-serve onboarding addition, a motion/flow design pass, a full light-theme rebuild, true background autonomy + webhook-required registration + a third real site in a different state, a real Fly.io deploy, and (this session) a real address lookup replacing the raw lat/lon fields in the "Add a site" form. Not yet committed or redeployed. Ready to continue Milestone 8 (harden + rehearse) after that.
+- **Phase / milestone:** Milestones 1-7 complete on real data, plus self-serve onboarding, motion/flow design pass, light-theme rebuild, autonomous background loop, webhook isolation, and address lookup via OpenStreetMap Nominatim. All 15 local commits pushed to GitHub (`origin/main`) and app successfully redeployed to Fly.io. Ready to continue Milestone 8 (harden + rehearse).
 - **The web server now runs a real autonomous background loop** (`web/server.py::_background_loop`, started via `@app.on_event("startup")`) — every registered site gets a real decision on its own, on a real hourly interval, with zero clicks required. `POST /api/run` still exists as an on-demand trigger of the identical code path, for demos that do not want to wait an hour.
-- **Live demo URL is real: https://lookoutapp.fly.dev/** (landing) and **https://lookoutapp.fly.dev/app** (dashboard), deployed to Fly.io under the user's `fullbuild` org. **The production deploy predates the address lookup form added this session — redeploy before demoing that specific feature live.**
-- **Last updated:** 2026-08-22 by Claude (agent session)
+- **Live demo URL is real:** https://lookoutapp.fly.dev/ (landing) and https://lookoutapp.fly.dev/app (dashboard), deployed and up-to-date on Fly.io.
+- **Last updated:** 2026-08-25 by Antigravity (agent session)
 - **Repo:** https://github.com/Datwebguy/lookout
 - **Local dev URL: use `http://127.0.0.1:8001`, not 8000** — port 8000 became stuck in a broken/inconsistent state after repeated `--reload` cycles in this environment; moved to 8001 rather than keep fighting it. See the session log if this recurs.
 
