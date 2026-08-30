@@ -3,7 +3,6 @@
 * **Live Production Platform:** https://lookoutapp.fly.dev
 * **Interactive Operations Dashboard:** https://lookoutapp.fly.dev/app
 * **GitHub Repository:** https://github.com/Datwebguy/lookout
-* **Hackathon Collaborator Handle:** Hackathon:FG
 * **Project Lead:** @Datweb3guy (https://x.com/Datweb3guy)
 * **Core Technology:** FortyGuard Real Time Thermal Intelligence API, FastAPI, OpenAI GPT:4o
 
@@ -11,7 +10,7 @@
 
 ## 🌟 Executive Summary
 
-Lookout is an autonomous heat safety agent designed for outdoor workforce managers across construction, logistics, agriculture, utilities, and municipal public works. Regional weather apps provide single citywide numbers that fail to capture dangerous localized microclimates. Lookout continuously monitors hyper-local heat stress at exact worksite GPS coordinates using FortyGuard thermal API telemetry.
+Lookout is an autonomous heat safety platform engineered for managers across construction, logistics, agriculture, utilities, and municipal public works. Regional weather apps provide single citywide numbers that fail to capture dangerous localized microclimates. Lookout continuously monitors hyper-local heat stress at exact worksite GPS coordinates using FortyGuard thermal API telemetry.
 
 Lookout calculates personalized worker safety decisions without requiring human prompts:
 * **Hyperlocal Thermal Telemetry:** Evaluates real time ground and air microclimate temperatures.
@@ -163,15 +162,6 @@ Lookout leverages FortyGuard's core endpoints:
 * `POST /v1/satellite`: Performs land cover segmentation for surface urban heat island analysis.
 * `POST /v1/streetview`: Analyzes ground level shading and canopy coverage.
 * `POST /v1/heat_intelligence`: Generates structured PDF heat intelligence briefs.
-
----
-
-## 🏆 Hackathon Alignment & Submission Details
-
-* **Primary Track:** Track 06 Agentic AI (Autonomous execution, tool calling, proactive decision making without human prompting).
-* **Secondary Categories:** Cities (Track 01) and Government (Track 04).
-* **GitHub Repository Access:** Added `Hackathon:FG` as collaborator.
-* **Credentials Security:** Secrets and API keys are stored exclusively in server side environment variables.
 
 ---
 
