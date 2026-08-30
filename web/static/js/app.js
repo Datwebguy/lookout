@@ -410,18 +410,22 @@ async function setupGoogleAuthUI() {
       google.accounts.id.initialize({
         client_id: clientId,
         callback: handleGoogleCredentialCallback,
+        auto_select: false,
       });
 
       if (gateContainer) {
         gateContainer.innerHTML = "";
         google.accounts.id.renderButton(gateContainer, {
+          type: "standard",
           theme: "outline",
           size: "large",
           shape: "pill",
           text: "signin_with",
+          logo_alignment: "left",
           width: 280,
         });
       }
+
       google.accounts.id.prompt();
     }
 
