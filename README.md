@@ -120,6 +120,16 @@ GOOGLE_CLIENT_ID=your_google_client_id
 SLACK_WEBHOOK_URL=your_slack_webhook_url
 ```
 
+#### Slack Webhook Setup Guide (1-Minute Setup)
+To receive automated alerts directly in Slack:
+* Open the Slack App Console: https://api.slack.com/apps
+* Click **Create New App** -> Select **From scratch**
+* Name your app `Lookout Heat Safety` and select your workspace
+* Under **Features**, click **Incoming Webhooks** and toggle switch to **ON**
+* Click **Add New Webhook to Workspace**, select your alert channel (e.g. `#safety`), and click **Allow**
+* Copy the generated Webhook URL (format: `https://hooks.slack.com/services/...`) and paste it into Lookout
+
+
 ### Step 5: Start Local Web Server
 ```bash
 uvicorn web.server:app --host 127.0.0.1 --port 8001 --reload

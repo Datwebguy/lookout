@@ -137,11 +137,18 @@
             <label for="site-notes">Notes</label>
             <input id="site-notes" name="notes" type="text" maxlength="300" placeholder="Optional" />
           </div>
-          <p class="form-note">Alerts for your site need their own channel. Add a Slack webhook, a Discord webhook, or both, so your alerts do not land in someone else's channel.</p>
+          <p class="form-note">
+            Alerts for your site need their own channel. Add a Slack webhook, a Discord webhook, or both. 
+            <a href="https://api.slack.com/apps" target="_blank" rel="noopener noreferrer" style="color: var(--color-deep-teal); font-weight: 600; text-decoration: underline;">How to set up a Slack webhook (1-min guide) ↗</a>
+          </p>
           <div class="form-row">
-            <label for="site-slack">Slack webhook for this site</label>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+              <label for="site-slack" style="margin-bottom: 0;">Slack webhook for this site</label>
+              <a href="https://api.slack.com/apps" target="_blank" rel="noopener noreferrer" style="font-size: 0.8rem; color: var(--color-deep-teal); font-weight: 600; text-decoration: none;">Create Webhook on Slack ↗</a>
+            </div>
             <input id="site-slack" name="slack_webhook_url" type="url" placeholder="https://hooks.slack.com/services/..." />
           </div>
+
           <div class="form-row">
             <label for="site-discord">Discord webhook for this site</label>
             <input id="site-discord" name="discord_webhook_url" type="url" placeholder="https://discord.com/api/webhooks/..." />
