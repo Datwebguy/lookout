@@ -146,8 +146,8 @@ def _read_jsonl(path: Path, limit: int | None = None) -> list[dict]:
 @app.get("/api/sites")
 def get_sites(user_id: str | None = None) -> list[dict]:
     sites = load_sites(SITES_PATH)
-    if user_id:
-        sites = [s for s in sites if getattr(s, "workspace_id", "default") in (user_id, "default")]
+    target_workspace = user_id if user_id else "default"
+    sites = [s for s in sites if getattr(s, "workspace_id", "default") == target_workspace]
     return [
         {
             "id": s.id,
@@ -227,17 +227,18 @@ def create_site(payload: SiteIn) -> dict:
 @app.get("/api/decisions")
 def get_decisions(user_id: str | None = None, limit: int = 50) -> list[dict]:
     records = _read_jsonl(DECISION_LOG_PATH, limit=None)
-    if user_id:
-        records = [r for r in records if r.get("workspace_id", "default") in (user_id, "default")]
+    target_workspace = user_id if user_id else "default"
+    records = [r for r in records if r.get("workspace_id", "default") == target_workspace]
     return records[:limit]
 
 
 @app.get("/api/alerts")
 def get_alerts(user_id: str | None = None, limit: int = 50) -> list[dict]:
     records = _read_jsonl(ALERT_LOG_PATH, limit=None)
-    if user_id:
-        records = [r for r in records if r.get("workspace_id", "default") in (user_id, "default")]
+    target_workspace = user_id if user_id else "default"
+    records = [r for r in records if r.get("workspace_id", "default") == target_workspace]
     return records[:limit]
+
 
 
 

@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/css/styles.css" />
+<link rel="stylesheet" href="/static/css/styles.css?v=4" />
 <link rel="icon" href="/static/img/logo.svg?v=3" type="image/svg+xml">
 <link rel="shortcut icon" href="/static/img/logo.svg?v=3" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/static/img/logo.svg?v=3">
@@ -28,23 +28,24 @@
       <a href="/">Home</a>
       <div id="auth-container" class="auth-box">
         <div id="user-profile" hidden class="user-badge">
-          <img id="user-avatar-img" class="user-avatar" alt="User Profile" title="User Account" />
-          <button id="signout-btn" class="btn btn-ghost btn-small" type="button" style="padding: 3px 10px; margin-left: 6px;">Sign Out</button>
+          <img id="user-avatar" class="user-avatar" src="" alt="Google Profile" />
+          <button id="signout-btn" class="btn btn-ghost btn-small">Sign out</button>
         </div>
+        <a id="signin-nav-btn" href="/app" class="btn btn-pill-nav" style="display: none;">Sign in</a>
       </div>
     </nav>
 
   </div>
 </header>
 
-<!-- Dedicated Sign-In Screen (Shown when unauthenticated) -->
-<section id="auth-gate-screen" class="auth-gate-section">
-  <div class="auth-card">
-    <div class="brand-logo-center">
-      <span class="brand-mark-lg"></span>
-      <h2>Sign in to Lookout</h2>
+<!-- Authentication Gate Screen -->
+<section id="auth-gate" class="auth-gate-section">
+  <div class="auth-card" style="max-width: 440px; margin: 3rem auto; text-align: center; background: #ffffff; padding: 2.5rem 2rem; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.08);">
+    <div style="display: flex; justify-content: center; margin-bottom: 1rem;">
+      <span class="brand-mark-editorial" style="width: 48px; height: 48px;"></span>
     </div>
-    <p class="auth-card-sub">Access your private heat safety workspace and manage outdoor workforce alerts.</p>
+    <h2 style="font-size: 1.6rem; font-weight: 700; color: #0a2540; margin-bottom: 0.5rem;">Sign in to Lookout</h2>
+    <p class="auth-card-sub" style="color: #64748b; font-size: 0.95rem; margin-bottom: 1.5rem;">Access your private heat safety workspace and manage outdoor workforce alerts.</p>
     
     <!-- Official Google Identity Services GIS Sign-In Container -->
     <div id="g_id_signin_gate" class="g-signin-container" style="display: flex; justify-content: center; margin: 1.5rem 0;"></div>
@@ -70,13 +71,13 @@
       <h2>The Lookout difference</h2>
       <p class="panel-sub">Citywide weather apps vs. Lookout autonomous microclimate intelligence.</p>
 
-      <div class="comparison-grid">
-        <div class="comparison-card card-generic">
-          <div class="card-badge badge-gray">Generic Weather App</div>
-          <h3>Phoenix Regional Airport</h3>
-          <div class="temp-display-generic">102°F <span class="temp-unit">/ 38.9°C</span></div>
-          <p class="card-desc">Single ambient air reading taken at an open airport station. Ignores dark asphalt, roofing gear, and local solar radiation.</p>
-          <ul class="card-traits">
+      <div class="comparison-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+        <div class="comparison-card card-generic" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
+          <div class="card-badge badge-gray" style="display: inline-block; font-size: 11px; font-weight: 600; text-transform: uppercase; background: #e2e8f0; color: #475569; padding: 4px 10px; border-radius: 20px; margin-bottom: 12px;">Generic Weather App</div>
+          <h3 style="font-size: 1.2rem; font-weight: 700; color: #1e293b; margin: 0 0 8px 0;">Phoenix Regional Airport</h3>
+          <div class="temp-display-generic" style="font-size: 2rem; font-weight: 700; color: #64748b; margin: 8px 0;">102°F <span class="temp-unit" style="font-size: 1rem; color: #94a3b8;">/ 38.9°C</span></div>
+          <p class="card-desc" style="font-size: 0.9rem; color: #64748b; line-height: 1.5; margin-bottom: 1rem;">Single ambient air reading taken at an open airport station. Ignores dark asphalt, roofing gear, and local solar radiation.</p>
+          <ul class="card-traits" style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; font-size: 0.88rem; color: #64748b;">
             <li>❌ Static citywide snapshot</li>
             <li>❌ No worker-specific context</li>
             <li>❌ No exceedance duration tracking</li>
@@ -84,12 +85,12 @@
           </ul>
         </div>
 
-        <div class="comparison-card card-lookout">
-          <div class="card-badge badge-teal">Lookout Autonomous Agent</div>
-          <h3>Hyperlocal Worksites</h3>
-          <div class="temp-display-lookout">41.7°C <span class="temp-unit">Microclimate Peak</span></div>
-          <p class="card-desc">FortyGuard hyperlocal thermal telemetry calculated over exact worksite geometries with 6.5-hour exceedance duration tracking.</p>
-          <ul class="card-traits">
+        <div class="comparison-card card-lookout" style="background: #f2f8f7; border: 1px solid #cce5e3; border-radius: 12px; padding: 1.5rem;">
+          <div class="card-badge badge-teal" style="display: inline-block; font-size: 11px; font-weight: 600; text-transform: uppercase; background: #1c5d5f; color: #ffffff; padding: 4px 10px; border-radius: 20px; margin-bottom: 12px;">Lookout Autonomous Agent</div>
+          <h3 style="font-size: 1.2rem; font-weight: 700; color: #0a2540; margin: 0 0 8px 0;">Hyperlocal Worksites</h3>
+          <div class="temp-display-lookout" style="font-size: 2rem; font-weight: 700; color: #1c5d5f; margin: 8px 0;">41.7°C <span class="temp-unit" style="font-size: 1rem; color: #52796f;">Microclimate Peak</span></div>
+          <p class="card-desc" style="font-size: 0.9rem; color: #2d3748; line-height: 1.5; margin-bottom: 1rem;">FortyGuard hyperlocal thermal telemetry calculated over exact worksite geometries with 6.5-hour exceedance duration tracking.</p>
+          <ul class="card-traits" style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; font-size: 0.88rem; color: #0a2540; font-weight: 500;">
             <li>✓ Hyperlocal GPS polygon telemetry</li>
             <li>✓ Personalized to worker role & PPE</li>
             <li>✓ Pre-schedules cooling breaks ending at peak heat</li>
