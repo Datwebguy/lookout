@@ -147,7 +147,7 @@ def _read_jsonl(path: Path, limit: int | None = None) -> list[dict]:
 def get_sites(user_id: str | None = None) -> list[dict]:
     sites = load_sites(SITES_PATH)
     if user_id:
-        sites = [s for s in sites if getattr(s, "workspace_id", "default") == user_id]
+        sites = [s for s in sites if getattr(s, "workspace_id", "default") in (user_id, "default")]
     return [
         {
             "id": s.id,
@@ -228,7 +228,7 @@ def create_site(payload: SiteIn) -> dict:
 def get_decisions(user_id: str | None = None, limit: int = 50) -> list[dict]:
     records = _read_jsonl(DECISION_LOG_PATH, limit=None)
     if user_id:
-        records = [r for r in records if r.get("workspace_id") == user_id]
+        records = [r for r in records if r.get("workspace_id", "default") in (user_id, "default")]
     return records[:limit]
 
 
@@ -236,8 +236,9 @@ def get_decisions(user_id: str | None = None, limit: int = 50) -> list[dict]:
 def get_alerts(user_id: str | None = None, limit: int = 50) -> list[dict]:
     records = _read_jsonl(ALERT_LOG_PATH, limit=None)
     if user_id:
-        records = [r for r in records if r.get("workspace_id") == user_id]
+        records = [r for r in records if r.get("workspace_id", "default") in (user_id, "default")]
     return records[:limit]
+
 
 
 def _run_all_sites(fg_client: FortyGuardClient, openai_client: OpenAI, filter_user_id: str | None = None) -> list[dict]:

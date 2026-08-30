@@ -168,20 +168,24 @@ function setUpdating(isUpdating) {
 async function loadAll() {
   const statusEl = document.getElementById("run-status");
   const userId = getActiveUserId();
-  if (!userId) return;
+  const sitesUrl = userId ? `/api/sites?user_id=${encodeURIComponent(userId)}` : `/api/sites`;
+  const decisionsUrl = userId ? `/api/decisions?user_id=${encodeURIComponent(userId)}&limit=50` : `/api/decisions?limit=50`;
   try {
     const [sites, decisions] = await Promise.all([
-      fetchJSON(`/api/sites?user_id=${encodeURIComponent(userId)}`),
-      fetchJSON(`/api/decisions?user_id=${encodeURIComponent(userId)}&limit=50`),
+      fetchJSON(sitesUrl),
+      fetchJSON(decisionsUrl),
     ]);
     renderSiteGrid(sites, decisions);
     renderFeed(decisions);
   } catch (err) {
-    statusEl.hidden = false;
-    statusEl.className = "run-status is-error";
-    statusEl.textContent = `Could not load workspace data: ${err.message}`;
+    if (statusEl) {
+      statusEl.hidden = false;
+      statusEl.className = "run-status is-error";
+      statusEl.textContent = `Could not load workspace data: ${err.message}`;
+    }
   }
 }
+
 
 function wireRunButton() {
   const btn = document.getElementById("run-now-btn");
