@@ -458,6 +458,107 @@ button { font: inherit; }
   box-shadow: 0 4px 12px rgba(10, 37, 64, 0.06);
   transition: all 0.2s ease;
 }
+
+/* Comparison Panel: Weather App vs Lookout */
+.comparison-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 1.5rem;
+}
+@media (max-width: 768px) {
+  .comparison-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.comparison-card {
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+  border: 1px solid var(--border-subtle);
+  position: relative;
+}
+
+.card-generic {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.card-lookout {
+  background: var(--color-card-mint);
+  border-color: var(--color-mint-mist);
+}
+
+.card-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+}
+
+.badge-gray {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.badge-teal {
+  background: var(--color-deep-teal);
+  color: #ffffff;
+}
+
+.temp-display-generic {
+  font-family: var(--font-serif);
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #64748b;
+  margin: 8px 0;
+}
+
+.temp-display-lookout {
+  font-family: var(--font-serif);
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--color-deep-teal);
+  margin: 8px 0;
+}
+
+.temp-unit {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.card-desc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.card-traits {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.88rem;
+}
+
+.card-generic .card-traits li {
+  color: #64748b;
+}
+
+.card-lookout .card-traits li {
+  color: var(--color-charcoal-navy);
+  font-weight: 500;
+}
+
 .google-btn-lg:hover {
   background: var(--bg-paper);
   border-color: var(--blue-300);

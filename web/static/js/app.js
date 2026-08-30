@@ -441,10 +441,17 @@ async function setupGoogleAuthUI() {
 
 document.addEventListener("DOMContentLoaded", () => {
   setupGoogleAuthUI();
-  if (getActiveUserObj()) {
-    loadAll();
-  }
+  loadAll();
   wireRunButton();
   wireAddSiteForm();
   wireFindLocation();
+
+  const exploreBtn = document.getElementById("explore-demo-btn");
+  if (exploreBtn) {
+    exploreBtn.onclick = () => {
+      const comp = document.getElementById("comparison");
+      if (comp) comp.scrollIntoView({ behavior: "smooth" });
+    };
+  }
 });
+

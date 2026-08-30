@@ -48,25 +48,61 @@
     
     <!-- Official Google Identity Services GIS Sign-In Container -->
     <div id="g_id_signin_gate" class="g-signin-container" style="display: flex; justify-content: center; margin: 1.5rem 0;"></div>
-    
+    <div style="margin-top: 1rem; text-align: center;">
+      <button type="button" id="explore-demo-btn" class="btn btn-pill-nav" style="font-size: 0.9rem;">Explore Live Demo Workspace ↓</button>
+    </div>
     <div id="g_id_status_msg" class="form-status" style="margin-top: 1rem; font-size: 0.85rem;" role="status"></div>
   </div>
 </section>
 
-<!-- Private Workspace Dashboard (Unlocked upon authentication) -->
-<main id="main" class="app-main" hidden>
+<!-- Main Workspace Dashboard -->
+<main id="main" class="app-main">
   <div class="wrap">
     <div class="app-head">
       <h1>Live dashboard</h1>
       <button class="btn btn-primary" id="run-now-btn" type="button">Run a live check</button>
     </div>
 
-
     <div class="run-status" id="run-status" hidden role="status" aria-live="polite"></div>
+
+    <!-- Comparison Panel: Generic Weather vs Lookout -->
+    <section class="panel" id="comparison">
+      <h2>The Lookout difference</h2>
+      <p class="panel-sub">Citywide weather apps vs. Lookout autonomous microclimate intelligence.</p>
+
+      <div class="comparison-grid">
+        <div class="comparison-card card-generic">
+          <div class="card-badge badge-gray">Generic Weather App</div>
+          <h3>Phoenix Regional Airport</h3>
+          <div class="temp-display-generic">102°F <span class="temp-unit">/ 38.9°C</span></div>
+          <p class="card-desc">Single ambient air reading taken at an open airport station. Ignores dark asphalt, roofing gear, and local solar radiation.</p>
+          <ul class="card-traits">
+            <li>❌ Static citywide snapshot</li>
+            <li>❌ No worker-specific context</li>
+            <li>❌ No exceedance duration tracking</li>
+            <li>❌ Requires manual monitoring</li>
+          </ul>
+        </div>
+
+        <div class="comparison-card card-lookout">
+          <div class="card-badge badge-teal">Lookout Autonomous Agent</div>
+          <h3>Hyperlocal Worksites</h3>
+          <div class="temp-display-lookout">41.7°C <span class="temp-unit">Microclimate Peak</span></div>
+          <p class="card-desc">FortyGuard hyperlocal thermal telemetry calculated over exact worksite geometries with 6.5-hour exceedance duration tracking.</p>
+          <ul class="card-traits">
+            <li>✓ Hyperlocal GPS polygon telemetry</li>
+            <li>✓ Personalized to worker role & PPE</li>
+            <li>✓ Pre-schedules cooling breaks ending at peak heat</li>
+            <li>✓ Autonomous Slack & Discord webhook alerts</li>
+          </ul>
+        </div>
+      </div>
+    </section>
 
     <section class="panel" id="sites">
       <h2>Registered sites</h2>
       <p class="panel-sub">Each worker gets a decision built for them.</p>
+
 
       <details class="add-site">
         <summary>Add a site</summary>
